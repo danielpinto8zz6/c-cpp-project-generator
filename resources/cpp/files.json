@@ -1,0 +1,16 @@
+{
+    "directories": [
+        ".vscode",
+        "bin",
+        "include",
+        "lib",
+        "src"
+    ],
+    "files": [
+        "Makefile",
+        "src/main.cpp",
+        ".vscode/tasks.json",
+        ".vscode/launch.json",
+        ".vscode/c_cpp_properties.json"
+    ]
+}
