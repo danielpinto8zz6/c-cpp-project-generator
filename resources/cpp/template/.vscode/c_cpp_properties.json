@@ -20,25 +20,6 @@
             ]
         },
         {
-            "name": "Linux",
-            "includePath": [
-                "/usr/include",
-                "/usr/local/include",
-                "${workspaceRoot}"
-            ],
-            "defines": [],
-            "intelliSenseMode": "clang-x64",
-            "browse": {
-                "path": [
-                    "/usr/include",
-                    "/usr/local/include",
-                    "${workspaceRoot}"
-                ],
-                "limitSymbolsToIncludedHeaders": true,
-                "databaseFilename": ""
-            }
-        },
-        {
             "name": "Win32",
             "intelliSenseMode": "clang-x64",
             "includePath": [

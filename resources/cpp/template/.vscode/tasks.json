@@ -2,7 +2,7 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Build project",
+            "label": "Build",
             "type": "shell",
             "group": {
                 "kind": "build",
@@ -20,7 +20,7 @@
             ]
         },
         {
-            "label": "Build & run project",
+            "label": "Build & run",
             "type": "shell",
             "group": {
                 "kind": "test",
@@ -35,6 +35,20 @@
             "args": [
                 "-c",
                 "'make run'"
+            ]
+        },
+        {
+            "label": "Clean",
+            "type": "shell",
+            "windows": {
+                "command": "powershell"
+            },
+            "linux": {
+                "command": "bash"
+            },
+            "args": [
+                "-c",
+                "'make clean'"
             ]
         }
     ]

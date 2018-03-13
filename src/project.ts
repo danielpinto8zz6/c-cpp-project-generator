@@ -13,10 +13,6 @@ export namespace project {
             const source: string = Utils.getPathToExtensionRoot("resources", type, 'template', file);
             try {
                 fs.copySync(source, path.join(location, file));
-                // if (file === 'src/main.c') {
-                //     vscode.workspace.openTextDocument(path.join(location, file))
-                //         .then(doc => vscode.window.showTextDocument(doc));
-                // }
             } catch (err) {
                 console.error(err);
             }

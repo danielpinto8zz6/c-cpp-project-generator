@@ -1,5 +1,5 @@
-CXX		  := gcc
-CXX_FLAGS := -Wall -Wextra
+CC		  := gcc
+C_FLAGS := -Wall -Wextra
 
 BIN		:= bin
 SRC		:= src
@@ -12,8 +12,11 @@ EXECUTABLE	:= main
 
 all: $(BIN)/$(EXECUTABLE)
 
+clean:
+	-$(RM) $(BIN)/$(EXECUTABLE)
+
 run: all
 	./$(BIN)/$(EXECUTABLE)
 
 $(BIN)/$(EXECUTABLE): $(SRC)/*
-	$(CXX) $(CXX_FLAGS) -I$(INCLUDE) -L$(LIB) $^ -o $@ $(LIBRARIES)
+	$(CC) $(C_FLAGS) -I$(INCLUDE) -L$(LIB) $^ -o $@ $(LIBRARIES)
