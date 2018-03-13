@@ -9,6 +9,11 @@ export namespace project {
     export function copyFiles(type: string, location: string) {
         const data = JSON.parse(Utils.readFileIfExists(Utils.getPathToExtensionRoot("resources", type, 'files.json')));
 
+        // Do not include .vscode/c_cpp_properties.json on linux
+        if (process.platform === "linux") {
+            data.files.splice(data.files.length - 1, 1);
+        }
+        
         data.files.forEach((file: string) => {
             const source: string = Utils.getPathToExtensionRoot("resources", type, 'template', file);
             try {
