@@ -22,6 +22,9 @@ VSCode task: Configurations for building and running your project
 
 ## Release Notes
 
+### 1.0.4
+- Fixed makefile executable on windows for make clean
+
 ### 1.0.2
 - Fixed include path on linux
 - Added icon

@@ -7,8 +7,12 @@ INCLUDE	:= include
 LIB		:= lib
 
 LIBRARIES	:=
-EXECUTABLE	:= main
 
+ifeq ($(OS),Windows_NT)
+EXECUTABLE	:= main.exe
+else
+EXECUTABLE	:= main
+endif
 
 all: $(BIN)/$(EXECUTABLE)
 
