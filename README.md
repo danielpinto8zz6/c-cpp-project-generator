@@ -22,6 +22,10 @@ VSCode task: Configurations for building and running your project
 
 ## Release Notes
 
+### 1.1.0
+- Cleanups + fixes
+- Doesn't include c_cpp_properties anymore, c/c++ extension should find it automatically
+
 ### 1.0.4
 - Fixed makefile executable on windows for make clean
 
@@ -30,8 +34,8 @@ VSCode task: Configurations for building and running your project
 - Added icon
 
 ### 1.0.1
-- Improved debbuging
-- Better compatiblity with windows, mac os, linux
+- Improved debugging
+- Better compatibility with windows, mac os, linux
 - Added clean task
 
 ### 1.0.0

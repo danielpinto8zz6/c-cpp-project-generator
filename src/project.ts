@@ -1,34 +1,42 @@
 import * as vscode from 'vscode';
-import * as fs from "fs-extra";
-import * as path from "path";
+import * as fs from 'fs-extra';
+import * as path from 'path';
 import { Uri } from 'vscode';
-import { VSCodeUI } from "./VSCodeUI";
-import { Utils } from './Utils';
+import { VSCodeUI } from './VSCodeUI';
+import * as content from './content';
 
 export namespace project {
-    export function copyFiles(type: string, location: string) {
-        const data = JSON.parse(Utils.readFileIfExists(Utils.getPathToExtensionRoot("resources", type, 'files.json')));
-
-        // Do not include .vscode/c_cpp_properties.json on linux
-        if (process.platform === "linux") {
-            data.files.splice(data.files.length - 1, 1);
+    export function createFiles(type: string, location: string) {
+        if (process.platform === 'win32') {
+            content.launch_json.configurations[0].program += '.exe';
+            content.tasks_json.tasks[0].args[1] = 'mingw32-make';
+            content.tasks_json.tasks[1].args[1] = 'mingw32-make run';
+            content.tasks_json.tasks[2].args[1] = 'mingw32-make clean';
         }
-        
-        data.files.forEach((file: string) => {
-            const source: string = Utils.getPathToExtensionRoot("resources", type, 'template', file);
-            try {
-                fs.copySync(source, path.join(location, file));
-            } catch (err) {
-                console.error(err);
+
+        try {
+            fs.writeFileSync(path.join(location, '.vscode', 'tasks.json'), JSON.stringify(content.tasks_json, null, 4));
+            fs.writeFileSync(path.join(location, '.vscode', 'launch.json'), JSON.stringify(content.launch_json, null, 4));
+            switch (type) {
+                case 'c':
+                    fs.writeFileSync(path.join(location, 'src', 'main.c'), content.main_c);
+                    fs.writeFileSync(path.join(location, 'Makefile'), content.makefile_c);
+                    break;
+                case 'cpp':
+                    fs.writeFileSync(path.join(location, 'src', 'main.cpp'), content.main_cpp);
+                    fs.writeFileSync(path.join(location, 'Makefile'), content.makefile_cpp);
+                    break;
+                default:
+                    console.log('Invalid file type');
             }
-        });
+        } catch (err) {
+            console.error(err);
+        }
     }
 
 
-    export function createFolders(type: string, location: string): void {
-        const data = JSON.parse(Utils.readFileIfExists(Utils.getPathToExtensionRoot("resources", type, 'files.json')));
-
-        data.directories.forEach(function (dir: string) {
+    export function createFolders(location: string): void {
+        content.directories.forEach(function (dir: string) {
             try {
                 fs.ensureDirSync(path.join(location, dir));
             } catch (err) {
@@ -41,8 +49,8 @@ export namespace project {
         const result: Uri = await VSCodeUI.openDialogForFolder();
         if (result && result.fsPath) {
             await vscode.commands.executeCommand('vscode.openFolder', result);
-            createFolders(type, result.fsPath);
-            copyFiles(type, result.fsPath);
+            createFolders(result.fsPath);
+            createFiles(type, result.fsPath);
         }
     }
 }
