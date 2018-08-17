@@ -15,6 +15,12 @@ VSCode task: Configurations for building and running your project
 * If you are on linux you must install gcc and make
 * If you are on window you must install mingw
 
+## How to use
+* Go to command pallete (usually : ctrl + shift + p)
+* Search for "Create C project" or "Create c++ project" depending on your preference
+* Select the folder where the project should be created
+* That's it, project will open
+
 ## Extension Settings
 
 ## Known Issues
