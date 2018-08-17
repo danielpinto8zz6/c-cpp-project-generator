@@ -1,5 +1,9 @@
 # Change Log
 
+## [1.1.1]
+- Fix vulnerabilities
+- Add how to use
+
 ## [1.1.0]
 - Cleanups + fixes
 - Doesn't include c_cpp_properties anymore, c/c++ extension should find it automatically
