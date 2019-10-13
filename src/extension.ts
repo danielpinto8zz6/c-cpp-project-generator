@@ -1,15 +1,16 @@
-'use strict';
-
 import * as vscode from 'vscode';
-import { project } from "./project";
+import { Project } from './project';
 
 export async function activate(context: vscode.ExtensionContext) {
-    let createCProjectCommand = vscode.commands.registerCommand('extension.createCProject', () => {
-        project.createProject("c");
+    const project = new Project();
+    const createCProjectCommand = vscode.commands.registerCommand('extension.createCProject', () => {
+        project.createProject('c')
+            .catch(error => console.log(error));
     });
 
-    let createCppProjectCommand = vscode.commands.registerCommand('extension.createCppProject', () => {
-        project.createProject("cpp");
+    const createCppProjectCommand = vscode.commands.registerCommand('extension.createCppProject', () => {
+        project.createProject('cpp')
+            .catch(error => console.log(error));
     });
 
     context.subscriptions.push(createCProjectCommand, createCppProjectCommand);

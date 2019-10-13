@@ -2,11 +2,11 @@ import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import { Uri } from 'vscode';
-import { VSCodeUI } from './VSCodeUI';
+import { VSCodeUI } from './vscode-ui';
 import * as content from './content';
 
-export namespace project {
-    export function createFiles(type: string, location: string) {
+export class Project {
+    async createFiles({ type, location }: { type: string; location: string; }) {
         if (process.platform === 'win32') {
             content.launch_json.configurations[0].program += '.exe';
             content.tasks_json.tasks[0].args[1] = 'mingw32-make';
@@ -39,8 +39,8 @@ export namespace project {
     }
 
 
-    export function createFolders(location: string): void {
-        content.directories.forEach(function (dir: string) {
+    async createFolders(location: string) {
+        content.directories.forEach((dir: string) => {
             try {
                 fs.ensureDirSync(path.join(location, dir));
             } catch (err) {
@@ -49,12 +49,12 @@ export namespace project {
         });
     }
 
-    export async function createProject(type: string) {
+    async createProject(type: string) {
         const result: Uri = await VSCodeUI.openDialogForFolder();
         if (result && result.fsPath) {
             await vscode.commands.executeCommand('vscode.openFolder', result);
-            createFolders(result.fsPath);
-            createFiles(type, result.fsPath);
+            await this.createFolders(result.fsPath);
+            await this.createFiles({ type, location: result.fsPath });
         }
     }
 }
