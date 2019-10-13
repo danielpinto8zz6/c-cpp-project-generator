@@ -1,4 +1,10 @@
-# c-cpp-project-generator README
+![Logo](resources/logo.png)
+
+# C/C++ Project Generator
+
+[![Marketplace Version](https://vsmarketplacebadge.apphb.com/version-short/danielpinto8zz6.c-cpp-project-generator.svg)](https://marketplace.visualstudio.com/items?itemName=danielpinto8zz6.c-cpp-project-generator)
+[![Downloads](https://vsmarketplacebadge.apphb.com/downloads-short/danielpinto8zz6.c-cpp-project-generator.svg)](https://marketplace.visualstudio.com/items?itemName=danielpinto8zz6.c-cpp-project-generator)
+[![Rating](https://vsmarketplacebadge.apphb.com/rating-short/danielpinto8zz6.c-cpp-project-generator.svg)](https://marketplace.visualstudio.com/items?itemName=danielpinto8zz6.c-cpp-project-generator)
 
 Create C/C++ projects
 
@@ -21,32 +27,10 @@ VSCode task: Configurations for building and running your project
 * Select the folder where the project should be created
 * That's it, project will open
 
-## Extension Settings
-
-## Known Issues
-* Open main file after loading files
-
 ## Release Notes
 
-### 1.1.1
-- Fix vulnerabilities
-- Add how to use
+Refer to [CHANGELOG](CHANGELOG.md)
 
-### 1.1.0
-- Cleanups + fixes
-- Doesn't include c_cpp_properties anymore, c/c++ extension should find it automatically
+## Donation
 
-### 1.0.4
-- Fixed makefile executable on windows for make clean
-
-### 1.0.2
-- Fixed include path on linux
-- Added icon
-
-### 1.0.1
-- Improved debugging
-- Better compatibility with windows, mac os, linux
-- Added clean task
-
-### 1.0.0
-- Initial release
+If you like this extension, you can donate via **[PayPal](https://www.paypal.me/danielpinto8zz6)**. It will help me to spend more time improving this!
