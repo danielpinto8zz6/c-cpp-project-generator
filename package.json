@@ -50,7 +50,7 @@
         "vscode-test": "^1.2.0"
     },
     "dependencies": {
-        "@types/fs-extra": "^8.0.0",
+        "@types/fs-extra": "^8.0.1",
         "fs-extra": "^8.1.0"
     },
     "repository": {
