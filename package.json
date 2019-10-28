@@ -39,7 +39,7 @@
     },
     "devDependencies": {
         "@semantic-release/changelog": "^3.0.4",
-        "@semantic-release/git": "^7.0.16",
+        "@semantic-release/git": "^7.0.17",
         "@types/mocha": "^5.2.7",
         "@types/node": "^12.11.7",
         "@types/vscode": "^1.39.0",
