@@ -8,6 +8,7 @@ import * as content from './content';
 export class Project {
     async createFiles({ type, location }: { type: string; location: string; }) {
         if (process.platform === 'win32') {
+            content.launch_json.configurations[0].miDebuggerPath += '.exe';
             content.launch_json.configurations[0].program += '.exe';
             content.tasks_json.tasks[0].args[1] = 'mingw32-make';
             content.tasks_json.tasks[1].args[1] = 'mingw32-make run';
