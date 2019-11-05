@@ -48,7 +48,7 @@
         "semantic-release": "^15.13.28",
         "tslint": "^5.20.0",
         "typescript": "^3.6.4",
-        "vscode-test": "^1.2.0"
+        "vscode-test": "^1.2.2"
     },
     "dependencies": {
         "@types/fs-extra": "^8.0.1",
