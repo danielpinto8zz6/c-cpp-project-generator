@@ -45,7 +45,7 @@
         "@types/node": "^12.12.7",
         "@types/vscode": "^1.40.0",
         "semantic-release-vsce": "^2.2.8",
-        "semantic-release": "^15.13.30",
+        "semantic-release": "^15.13.31",
         "tslint": "^5.20.1",
         "typescript": "^3.7.2",
         "vscode-test": "^1.2.3"
