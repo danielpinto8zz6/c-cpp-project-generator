@@ -43,7 +43,7 @@
         "@semantic-release/git": "^7.0.18",
         "@types/mocha": "^5.2.7",
         "@types/node": "^12.12.17",
-        "@types/vscode": "^1.40.0",
+        "@types/vscode": "^1.41.0",
         "semantic-release-vsce": "^2.2.8",
         "semantic-release": "^15.13.31",
         "tslint": "^5.20.1",
