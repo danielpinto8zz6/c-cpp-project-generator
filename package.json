@@ -42,7 +42,7 @@
         "@semantic-release/git": "^7.0.16",
         "@semantic-release/git": "^7.0.18",
         "@types/mocha": "^5.2.7",
-        "@types/node": "^13.1.5",
+        "@types/node": "^13.1.6",
         "@types/vscode": "^1.41.0",
         "semantic-release-vsce": "^2.2.8",
         "semantic-release": "^15.14.0",
