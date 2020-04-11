@@ -2,7 +2,7 @@
     "name": "c-cpp-project-generator",
     "displayName": "C/C++ Project Generator",
     "description": "Generate C/C++ Projects",
-    "version": "1.1.1",
+    "version": "1.2.0",
     "icon": "resources/logo.png",
     "publisher": "danielpinto8zz6",
     "engines": {
@@ -39,10 +39,10 @@
     },
     "homepage": "https://github.com/danielpinto8zz6/c-cpp-project-generator#readme",
     "scripts": {
-        "vscode:prepublish": "npm run compile",
+        "vscode:prepublish": "npm run build",
         "build": "tsc -p ./",
         "watch": "tsc -watch -p ./",
-        "pretest": "npm run compile",
+        "pretest": "npm run build",
         "test": "node ./out/test/runTest.js",
         "release": "release-it --disable-metrics --ci",
         "lint": "tslint -c tslint.json \"src/**/*.ts\" --fix"

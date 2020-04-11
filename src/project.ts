@@ -3,37 +3,31 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import { Uri } from 'vscode';
 import { VSCodeUI } from './vscode-ui';
-import * as content from './content';
 
 export class Project {
-    async createFiles({ type, location }: { type: string; location: string; }) {
-        if (process.platform === 'win32') {
-            content.launch_json.configurations[0].miDebuggerPath += '.exe';
-            content.launch_json.configurations[0].program += '.exe';
-            content.tasks_json.tasks[0].args[1] = 'mingw32-make';
-            content.tasks_json.tasks[1].args[1] = 'mingw32-make run';
-            content.tasks_json.tasks[2].args[1] = 'mingw32-make clean';
-        }
+    directories: string[] = new Array('.vscode', 'bin', 'include', 'lib', 'src');
 
+    private context: vscode.ExtensionContext;
+
+    constructor(context: vscode.ExtensionContext) {
+        this.context = context;
+    }
+
+    async createFiles({ type, location }: { type: string; location: string; }) {
         try {
-            fs.writeFileSync(path.join(location, '.vscode', 'tasks.json'), JSON.stringify(content.tasks_json, null, 4));
-            fs.writeFileSync(path.join(location, '.vscode', 'launch.json'), JSON.stringify(content.launch_json, null, 4));
-            switch (type) {
-                case 'c':
-                    fs.writeFileSync(path.join(location, 'src', 'main.c'), content.main_c);
-                    fs.writeFileSync(path.join(location, 'Makefile'), content.makefile_c);
-                    vscode.workspace.openTextDocument(path.join(location, 'src', 'main.c'))
-                        .then(doc => vscode.window.showTextDocument(doc, { preview: false }));
-                    break;
-                case 'cpp':
-                    fs.writeFileSync(path.join(location, 'src', 'main.cpp'), content.main_cpp);
-                    fs.writeFileSync(path.join(location, 'Makefile'), content.makefile_cpp);
-                    vscode.workspace.openTextDocument(path.join(location, 'src', 'main.cpp'))
-                        .then(doc => vscode.window.showTextDocument(doc, { preview: false }));
-                    break;
-                default:
-                    console.log('Invalid file type');
-            }
+            const tasksPath = path.join(this.context.extensionPath, 'templates', 'tasks.json');
+            const launchPath = path.join(this.context.extensionPath, 'templates', 'launch.json');
+
+            const mainPath = path.join(this.context.extensionPath, 'templates', type, `main.${type}`);
+            const makefilePath = path.join(this.context.extensionPath, 'templates', type, 'Makefile');
+
+            fs.writeFileSync(path.join(location, '.vscode', 'tasks.json'), fs.readFileSync(tasksPath, 'utf-8'));
+            fs.writeFileSync(path.join(location, '.vscode', 'launch.json'), fs.readFileSync(launchPath, 'utf-8'));
+            fs.writeFileSync(path.join(location, 'src', `main.${type}`), fs.readFileSync(mainPath, 'utf-8'));
+            fs.writeFileSync(path.join(location, 'Makefile'), fs.readFileSync(makefilePath, 'utf-8'));
+
+            vscode.workspace.openTextDocument(path.join(location, 'src', 'main.cpp'))
+                .then(doc => vscode.window.showTextDocument(doc, { preview: false }));
         } catch (err) {
             console.error(err);
         }
@@ -41,7 +35,7 @@ export class Project {
 
 
     async createFolders(location: string) {
-        content.directories.forEach((dir: string) => {
+        this.directories.forEach((dir: string) => {
             try {
                 fs.ensureDirSync(path.join(location, dir));
             } catch (err) {

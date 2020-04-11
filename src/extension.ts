@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { Project } from './project';
 
 export async function activate(context: vscode.ExtensionContext) {
-    const project = new Project();
+    const project = new Project(context);
     const createCProjectCommand = vscode.commands.registerCommand('extension.createCProject', () => {
         project.createProject('c')
             .catch(error => console.log(error));
