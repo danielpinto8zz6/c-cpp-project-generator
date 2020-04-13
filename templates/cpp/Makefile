@@ -1,5 +1,6 @@
-CC		:= g++
-CFLAGS	:= -std=c++17 -Wall -Wextra -g
+CXX		:= g++
+CXXFLAGS	:= -std=c++17 -Wall -Wextra -g
+LDFLAGS		:=
 
 BIN		:= bin
 SRC		:= src
@@ -44,4 +45,5 @@ run: all
 	./$(BIN)/$(EXECUTABLE)
 
 $(BIN)/$(EXECUTABLE): $(OBJECTS)
-	$(CC) $(CFLAGS) $(CINCLUDES) $(CLIBS) $^ -o $@ $(LIBRARIES)
+	$(CXX) $(LDFLAGS) $(CINCLUDES) $(CLIBS) $^ -o $@ $(LIBRARIES)
+
