@@ -8,6 +8,7 @@ LIB		:= lib
 
 LIBRARIES	:=
 
+MD 		:= mkdir
 ifeq ($(OS),Windows_NT)
 EXECUTABLE	:= main.exe
 SOURCEDIRS	:= $(SRC)
@@ -26,7 +27,10 @@ CLIBS		:= $(patsubst %,-L%, $(LIBDIRS:%/=%))
 SOURCES		:= $(wildcard $(patsubst %,%/*.c, $(SOURCEDIRS)))
 OBJECTS		:= $(SOURCES:.c=.o)
 
-all: $(BIN)/$(EXECUTABLE)
+all: $(BIN) $(BIN)/$(EXECUTABLE)
+
+$(BIN):
+	$(MD) -p $(BIN)
 
 .PHONY: clean
 clean:
