@@ -9,12 +9,15 @@ LIB		:= lib
 
 LIBRARIES	:=
 
+
+MD 		:= mkdir
 ifeq ($(OS),Windows_NT)
 EXECUTABLE	:= main.exe
 SOURCEDIRS	:= $(SRC)
 INCLUDEDIRS	:= $(INCLUDE)
 LIBDIRS		:= $(LIB)
 else
+
 EXECUTABLE	:= main
 SOURCEDIRS	:= $(shell find $(SRC) -type d)
 INCLUDEDIRS	:= $(shell find $(INCLUDE) -type d)
@@ -27,7 +30,10 @@ CLIBS		:= $(patsubst %,-L%, $(LIBDIRS:%/=%))
 SOURCES		:= $(wildcard $(patsubst %,%/*.cpp, $(SOURCEDIRS)))
 OBJECTS		:= $(SOURCES:.cpp=.o)
 
-all: $(BIN)/$(EXECUTABLE)
+all: $(BIN) $(BIN)/$(EXECUTABLE)
+
+$(BIN):
+	$(MD) -p $(BIN)
 
 .PHONY: clean
 clean:
@@ -40,3 +46,4 @@ run: all
 
 $(BIN)/$(EXECUTABLE): $(OBJECTS)
 	$(CXX) $(LDFLAGS) $(CINCLUDES) $(CLIBS) $^ -o $@ $(LIBRARIES)
+
