@@ -47,3 +47,5 @@ run: all
 $(BIN)/$(EXECUTABLE): $(OBJECTS)
 	$(CXX) $(LDFLAGS) $(CINCLUDES) $(CLIBS) $^ -o $@ $(LIBRARIES)
 
+.cpp.o:
+	$(CC) -c $(CFLAGS) $(CINCLUDES) $(CLIBS) $< -o $@ $(LIBRARIES)
