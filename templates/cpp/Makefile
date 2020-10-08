@@ -17,7 +17,6 @@ SOURCEDIRS	:= $(SRC)
 INCLUDEDIRS	:= $(INCLUDE)
 LIBDIRS		:= $(LIB)
 else
-
 EXECUTABLE	:= main
 SOURCEDIRS	:= $(shell find $(SRC) -type d)
 INCLUDEDIRS	:= $(shell find $(INCLUDE) -type d)
@@ -31,6 +30,7 @@ SOURCES		:= $(wildcard $(patsubst %,%/*.cpp, $(SOURCEDIRS)))
 OBJECTS		:= $(SOURCES:.cpp=.o)
 
 all: $(BIN) $(BIN)/$(EXECUTABLE)
+	@echo "Executing 'all' complete!"
 
 $(BIN):
 	$(MD) -p $(BIN)
@@ -39,13 +39,16 @@ $(BIN):
 clean:
 	-$(RM) $(BIN)/$(EXECUTABLE)
 	-$(RM) $(OBJECTS)
-
+	@echo "Cleanup complete!"
 
 run: all
 	./$(BIN)/$(EXECUTABLE)
+	@echo "Executing 'run: all' complete!"
+	
+.cpp.o:
+	$(CXX) -c $(LDFLAGS) $(CINCLUDES) $(CLIBS) $< -o $@ $(LIBRARIES)
+	@echo "Compiled "$<" successfully!"
 
 $(BIN)/$(EXECUTABLE): $(OBJECTS)
 	$(CXX) $(LDFLAGS) $(CINCLUDES) $(CLIBS) $^ -o $@ $(LIBRARIES)
-
-.cpp.o:
-	$(CXX) -c $(LDFLAGS) $(CINCLUDES) $(CLIBS) $< -o $@ $(LIBRARIES)
+	@echo "Linking complete!"

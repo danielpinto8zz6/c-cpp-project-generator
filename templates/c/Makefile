@@ -27,7 +27,8 @@ CLIBS		:= $(patsubst %,-L%, $(LIBDIRS:%/=%))
 SOURCES		:= $(wildcard $(patsubst %,%/*.c, $(SOURCEDIRS)))
 OBJECTS		:= $(SOURCES:.c=.o)
 
-all: $(BIN) $(BIN)/$(EXECUTABLE)
+all: $(BIN)/$(EXECUTABLE)
+	@echo "Executing 'all' complete!"
 
 $(BIN):
 	$(MD) -p $(BIN)
@@ -36,10 +37,16 @@ $(BIN):
 clean:
 	-$(RM) $(BIN)/$(EXECUTABLE)
 	-$(RM) $(OBJECTS)
-
+	@echo "Cleanup complete!"
 
 run: all
 	./$(BIN)/$(EXECUTABLE)
+	@echo "Executing 'run: all' complete!"
+
+.c.o:
+	$(CC) $(CFLAGS) $(CINCLUDES) -c $*.c -o $@
+	@echo "Compiled "$<" successfully!"
 
 $(BIN)/$(EXECUTABLE): $(OBJECTS)
 	$(CC) $(CFLAGS) $(CINCLUDES) $(CLIBS) $^ -o $@ $(LIBRARIES)
+	@echo "Linking complete!"
