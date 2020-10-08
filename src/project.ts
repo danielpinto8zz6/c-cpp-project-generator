@@ -5,7 +5,7 @@ import { Uri } from 'vscode';
 import { VSCodeUI } from './vscode-ui';
 
 export class Project {
-    directories: string[] = new Array('.vscode', 'bin', 'include', 'lib', 'src');
+    directories: string[] = new Array('.vscode', 'output', 'include', 'lib', 'src');
 
     private context: vscode.ExtensionContext;
 
