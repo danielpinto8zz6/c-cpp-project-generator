@@ -12,7 +12,7 @@ Create C/C++ projects
 
 Project will generate the following:
 
-Project structure: Common folders like src, include and bin
+Project structure: Common folders like src, include and output
 Makefile: A makefile already set up to build and run your project
 VSCode task: Configurations for building and running your project
 
