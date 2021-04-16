@@ -78,14 +78,17 @@ $(MAIN): $(OBJECTS)
 # the rule(a .c file) and $@: the name of the target of the rule (a .o file) 
 # (see the gnu make manual section about automatic variables)
 .cpp.o:
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $<  -o $@
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -MMD $<  -o $@
 
 .PHONY: clean
 clean:
 	$(RM) $(OUTPUTMAIN)
 	$(RM) $(call FIXPATH,$(OBJECTS))
+	$(RM) $(call FIXPATH,$(SRC)/*.d)
 	@echo Cleanup complete!
 
 run: all
 	./$(OUTPUTMAIN)
 	@echo Executing 'run: all' complete!
+
+-include $(call FIXPATH,$(SRC)/*.d)
