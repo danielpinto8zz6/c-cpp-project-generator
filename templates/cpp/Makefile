@@ -79,9 +79,10 @@ $(MAIN): $(OBJECTS)
 # include all .d files
 -include $(DEPS)
 
-# this is a suffix replacement rule for building .o's from .c's
+# this is a suffix replacement rule for building .o's and .d's from .c's
 # it uses automatic variables $<: the name of the prerequisite of
 # the rule(a .c file) and $@: the name of the target of the rule (a .o file) 
+# -MMD generates dependency output files same name as the .o file
 # (see the gnu make manual section about automatic variables)
 .cpp.o:
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -MMD $<  -o $@
