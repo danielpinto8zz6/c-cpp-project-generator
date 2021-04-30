@@ -109,6 +109,7 @@ clean:
 	@echo Removing files..
 	$(RM) $(TARGET_OUTPUT)
 	$(RM) $(call FIXPATH,$(OBJECTS))
+	$(RM) $(call FIXPATH,$(DEPS))
 	@echo Removing directories..
 	$(RM) -rf $(OBJ_DIR) $(TARGET_DIR)
 	@echo Cleanup complete!
