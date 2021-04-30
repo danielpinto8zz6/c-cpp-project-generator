@@ -87,8 +87,7 @@ TARGET_OUTPUT	:=	$(call FIXPATH,$(TARGET_DIR)/$(TARGET))
 
 
 # makes build directory, updates your objects, builds your executable
-all: 
-	$(MD) $(OBJ_DIR) $(TARGET_DIR)
+all: --directories
 	+$(MAKE) $(TARGET)
 	@echo Executing 'all' complete!
 
@@ -103,6 +102,10 @@ $(TARGET): $(OBJECTS)
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	$(CXX) $(CXXFLAGS) -c -MMD $< -o $@ $(LFLAGS) $(LIBS) $(INCLUDES)
 
+
+#Make the Directories
+--directories:
+	$(MD) $(OBJ_DIR) $(TARGET_DIR)
 
 #Cean removes all the object and executable files
 clean:
