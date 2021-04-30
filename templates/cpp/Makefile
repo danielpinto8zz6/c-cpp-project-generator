@@ -2,17 +2,18 @@
 # 'make'        build executable file 'main'
 # 'make run'    build and run executable file
 # 'make clean'  removes all .o and executable files
-# 'make remake' execute a make clean and subsequently a make
+# 'make remake' execute a make clean and subsequently a compile all
+# 'make Help'   is intended to provide the user a minimum of guide-lines
 #
 
 # define the Cpp compiler to use
-CXX		= g++
+CXX			= g++
 # sources extensions
-SRCEXT		:= cpp
-# define any compile-time flags
-CXXFLAGS	:= -std=$(subst p,+,$(SRCEXT))17 -Wall -Wextra -g
-#to compile large sized file
-BIGFILE		= -Wa,-mbig-obj
+SRCEXT			:= cpp
+# define the compiler version
+COMPILER_VERSION 	:= 17
+# to compile large sized file
+BIGFILE			= -Wa,-mbig-obj
 # define library paths in addition to /usr/lib
 #   if I wanted to include libraries not in /usr/lib I'd specify
 #   their path using -Lpath, something like:
@@ -36,6 +37,9 @@ TARGET_NAME		= software
 #---------------------------------------------------------------------------------
 #DO NOT EDIT BELOW THIS LINE
 #---------------------------------------------------------------------------------
+
+# define any compile-time flags
+CXXFLAGS	:= -std=$(subst p,+,$(SRCEXT))17 -Wall -Wextra -g
 
 ifeq ($(OS),Windows_NT)
 TARGET		:= $(TARGET_NAME).exe
