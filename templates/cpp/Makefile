@@ -6,7 +6,7 @@
 #
 
 # define the Cpp compiler to use
-CXX			= g++
+CXX		= g++
 # sources extensions
 SRCEXT		:= cpp
 # define any compile-time flags
@@ -29,7 +29,7 @@ INCLUDE_DIR_NAME	:= include
 LIB_DIR_NAME		:= lib
 
 # define the main
-TARGET_NAME		= main
+TARGET_NAME		= software
 
 
 
@@ -44,9 +44,9 @@ TARGET_DIR	:= $(TARGET_DIR_NAME)
 OBJ_DIR		:= $(OBJECT_DIR_NAME)
 INCL_DIRS	:= $(INCLUDE_DIR_NAME)
 LIB_DIRS	:= $(LIB_DIR_NAME)
-FIXPATH = $(subst /,\,$1)
-RM			:= del /q /f
-MD			:= @mkdir -p
+FIXPATH 	= $(subst /,\,$1)
+RM		:= del /q /f
+MD		:= @mkdir -p
 else
 TARGET		:= $(TARGET_NAME)
 SRC_DIR		:= $(shell find $(SRC_DIR_NAME) -type d)
@@ -54,9 +54,9 @@ TARGET_DIR	:= $(shell find $(TARGET_DIR_NAME) -type d)
 OBJ_DIR		:= $(shell find $(OBJECT_DIR_NAME) -type d)
 INCL_DIRS	:= $(shell find $(INCLUDE_DIR_NAME) -type d)
 LIB_DIRS	:= $(shell find $(LIB_DIR_NAME) -type d)
-FIXPATH = $1
-RM = rm -f
-MD	:= @mkdir -p
+FIXPATH 	= $1
+RM 		= rm -f
+MD		:= @mkdir -p
 endif
 
 # define any directories containing header files other than /usr/include
@@ -67,6 +67,8 @@ LIBS		:= $(patsubst %,-L%, $(LIB_DIRS:%/=%))
 SOURCES		:= $(wildcard $(patsubst %,%/*.$(SRCEXT), $(SRC_DIR)))
 # define the C object files
 OBJECTS		:= $(SOURCES:.cpp=.o)
+# define the dependency output files
+DEPS		:= $(OBJECTS:.o=.d)
 
 #
 # The following part of the makefile is generic; it can be used to 
@@ -90,9 +92,12 @@ all:
 $(TARGET): $(OBJECTS)
 	$(CXX) $^ $(CXXFLAGS) -o $(TARGET_OUTPUT) $(LFLAGS) $(LIBS) $(INCLUDES)
 
+# include all .d files
+-include $(DEPS)
+
 # builds your objects
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
-	$(CXX) $(CXXFLAGS) -c $< -o $@ $(LFLAGS) $(LIBS) $(INCLUDES)
+	$(CXX) $(CXXFLAGS) -c -MMD $< -o $@ $(LFLAGS) $(LIBS) $(INCLUDES)
 
 
 #Cean removes all the object and executable files
@@ -117,8 +122,8 @@ run: all
 #Help is intended to provide the user a minimum of guide-lines
 help:
 	@echo "`make`        - builds/updates everything, is ready to run with `./$(TARGET_OUTPUT)` after completion"
+	@echo "`make clean`  - removes object file folder and executable"
 	@echo "`make remake` - remake consist of cleaning and compileing all"
-	@echo "`make clean`  - removes object-file folders and executable"
 	@echo "`make run`    - builds/updates everything, runs immediately"
 
 #Non-File Targets
