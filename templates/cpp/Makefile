@@ -122,14 +122,15 @@ remake: clean all
 run: all
 	$(TARGET_OUTPUT)
 	@echo Executing 'run: all' complete!
-	@echo Executing $(TARGET_OUTPUT)
 
 #Help is intended to provide the user a minimum of guide-lines
 help:
-	@echo "`make`        - builds/updates everything, is ready to run with `./$(TARGET_OUTPUT)` after completion"
-	@echo "`make clean`  - removes object file folder and executable"
-	@echo "`make remake` - remake consist of cleaning and compileing all"
-	@echo "`make run`    - builds/updates everything, runs immediately"
+	@echo
+	@echo "make        - builds/updates everything, is ready to run with $(TARGET_OUTPUT) after completion"
+	@echo "make clean  - removes object file folder and executable"
+	@echo "make remake - remake consist of cleaning and compileing all"
+	@echo "make run    - builds/updates everything, runs immediately"
+	@echo
 
 #Non-File Targets
 .PHONY: all clean remake run help
