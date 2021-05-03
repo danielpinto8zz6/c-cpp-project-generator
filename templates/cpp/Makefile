@@ -11,15 +11,15 @@
 
 # sources extension (project language)
 SRCEXT				:= cpp
-# define the compiler to use
-CXX				= auto
-# define the compiler support version (e.g: 98, 99, 11, 14, 17, 2a)
-COMPILER_SUPPORT		= auto
+# define the compiler to use (e.g: gcc, c++, ...)
+CCX					= auto
+# define the compiler support version (e.g: 98, 99, 11, 14, 17, 2a, ...)
+COMPILER_SUPPORT	= auto
 # to compile big sized objects \
 (set to: 'true' if "too big file" exceptions occur, auto to handle it automatically or false to ignore it)
 BIGFILE				= auto
 # get general warnings (set to false to remove general warnings)
-GENERAL_WARNINGS    		:= true
+GENERAL_WARNINGS    := true
 # get larger amount of warnings (set to false to remove negligible warnings)
 USE_STRICT 			:= false
 
@@ -62,13 +62,13 @@ LIB_DIR_NAME		:= lib
 
 STD = $(subst p,+,$(SRCEXT))
 
-# define the Cpp compiler to use
-ifeq  ($(subst auto,,$(CXX)),)
+# define the compiler to use
+ifeq  ($(subst auto,,$(CCX)),)
 	ifeq ($(SRCEXT),c)
-		CXX := gcc
+		CCX := gcc
 		STD := c
 	else ifeq ($(SRCEXT),cpp)
-		CXX := g++
+		CCX := g++
 		STD := c++
 	endif
 endif
@@ -131,7 +131,7 @@ CWARNSCPP_STRICT = \
 	-Wcast-qual
 
 # define flags
-ifeq ($(findstring gcc,$(CXX)),gcc)
+ifeq ($(findstring gcc,$(CCX)),gcc)
 	STD := c
 	ifeq ($(GENERAL_WARNINGS),true)
 		CWARNS = $(CWARNSC) $(CWARNGCC)
@@ -139,7 +139,7 @@ ifeq ($(findstring gcc,$(CXX)),gcc)
 			CWARNS += $(CWARNSCPP_STRICT)
 		endif
 	endif
-else ifeq ($(findstring g++,$(CXX)),g++)
+else ifeq ($(findstring g++,$(CCX)),g++)
 	STD := c++
 	ifeq ($(GENERAL_WARNINGS),true)
 		CWARNS = $(CWARNSCPP)
@@ -171,8 +171,8 @@ ifeq ($(OS),Windows_NT)
 	INCL_DIRS	:= $(INCLUDE_DIR_NAME)
 	LIB_DIRS	:= $(LIB_DIR_NAME)
 	FIXPATH 	= $1$(subst /,\,$1)
-	RM		= del /q /f
-	MD		:= @mkdir -p
+	RM			= del /q /f
+	MD			:= @mkdir -p
 else
 	TARGET		:= $(TARGET_NAME)
 	SRC_DIR		:= $(shell find $(SRC_DIR_NAME) -type d)
@@ -181,8 +181,8 @@ else
 	INCL_DIRS	:= $(shell find $(INCLUDE_DIR_NAME) -type d)
 	LIB_DIRS	:= $(shell find $(LIB_DIR_NAME) -type d)
 	FIXPATH 	= $1
-	RM 		= rm -f
-	MD		:= @mkdir -p
+	RM 			= rm -f
+	MD			:= @mkdir -p
 endif
 
 # define any directories containing header files other than /usr/include
@@ -204,7 +204,7 @@ DEPS		= $(OBJECTS:.o=.d)
 # finds all your objects that corrispond to your .cpp files, system agnostic version
 OBJECTS 		:= $(patsubst $(SRC_DIR)/%.$(SRCEXT), $(OBJ_DIR)/%.o, $(wildcard $(SRC_DIR)/*.$(SRCEXT)))
 # defining target directory
-TARGET_OUTPUT		=	$(call FIXPATH,$(TARGET_DIR)/$(TARGET))
+TARGET_OUTPUT	=	$(call FIXPATH,$(TARGET_DIR)/$(TARGET))
 
 
 
@@ -224,13 +224,13 @@ all: --directories
 
 # updates your objects, builds your executable
 $(TARGET_OUTPUT): $(OBJECTS)
-	$(CXX) $(CXXFLAGS) $^ -o $@ $(LFLAGS) $(LIBS) $(INCLUDES)
+	$(CCX) $(CXXFLAGS) $^ -o $@ $(LFLAGS) $(LIBS) $(INCLUDES)
 
 
 
 
 
-#############################2
+#############################
 ######### COMPILER ##########
 #############################
 
@@ -240,7 +240,7 @@ $(TARGET_OUTPUT): $(OBJECTS)
 
 #builds your objects
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
-	$(CXX) $(CXXFLAGS) $(BIG_EXP) -c -MMD $< -o $@ $(LFLAGS) $(LIBS) $(INCLUDES)
+	$(CCX) $(CXXFLAGS) $(BIG_EXP) -c -MMD $< -o $@ $(LFLAGS) $(LIBS) $(INCLUDES)
 
 
 
@@ -256,9 +256,11 @@ exp_handler:
 	@if [ $(BIGFILE) = auto ]; then \
 		echo ;\
 		echo Attempt to handle "'Too big file'" exception by enabling the "'BIGFILE'" flag; \
+		echo ; \
 		$(MAKE) BIGFILE=true; \
 		echo ;\
 		echo Executing "'all'" complete by using "'BIGFILE'" flag!; \
+		echo ;\
 	fi
 
 #Make the Directories
