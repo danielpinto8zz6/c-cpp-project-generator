@@ -11,12 +11,12 @@
 
 # sources extension (project language)
 SRCEXT				:= cpp
-# define the compiler to use (e.g: gcc, c++, ...)
+# define the compiler to use
 CCX				= auto
-# define the compiler support version (e.g: 98, 99, 11, 14, 17, 2a, ...)
+# define the compiler support version (e.g: 98, 99, 11, 14, 17, 2a)
 COMPILER_SUPPORT		= auto
 # to compile big sized objects \
-(set to: 'true' if "too big file" exceptions occur, auto to handle it automatically or false to ignore it)
+(set to: 'true' if "file too big" exceptions occur, auto to handle it automatically or false to ignore it)
 BIGFILE				= auto
 # get general warnings (set to false to remove general warnings)
 GENERAL_WARNINGS    		:= true
@@ -212,6 +212,25 @@ TARGET_OUTPUT	= $(call FIXPATH,$(TARGET_DIR)/$(TARGET))
 
 
 #############################
+########## UTILITY ##########
+#############################
+
+
+#chose text style
+COLOR = $(if $(filter red,$2),"\e[1;31m$(subst ",,$1)\e[0m",\
+		$(if $(filter green,$2),"\e[1;32m$(subst ",,$1)\e[0m",\
+			$(if $(filter yellow,$2),"\e[1;33m$(subst ",,$1)\e[0m",\
+				$(if $(filter blue,$2),"\e[1;34m$(subst ",,$1)\e[0m",\
+					$(if $(filter magenta,$2),"\e[1;35m$(subst ",,$1)\e[0m",\
+						$(if $(filter cyan,$2),"\e[1;36m$(subst ",,$1)\e[0m",$1))))))
+#enable echo output styling
+PRINTLN := echo -e
+
+
+
+
+
+#############################
 ######### ASSEMBLER #########
 #############################
 
@@ -219,7 +238,7 @@ TARGET_OUTPUT	= $(call FIXPATH,$(TARGET_DIR)/$(TARGET))
 # makes build directory, updates your objects, builds your executable
 all: --directories
 	@+$(MAKE) $(TARGET_OUTPUT) \
-	&& echo Executing "'all'" complete! \
+	&& $(PRINTLN) $(call COLOR,Executing 'all' complete!,green) \
 	|| $(MAKE) -s exp_handler
 
 # updates your objects, builds your executable
@@ -255,11 +274,11 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 exp_handler:
 	@if [ $(BIGFILE) = auto ]; then \
 		echo ;\
-		echo Attempt to handle "'Too big file'" exception by enabling the "'BIGFILE'" flag; \
+		$(PRINTLN) $(call COLOR,Attempt,magenta) to handle "'File too big'" exception by enabling the "'BIGFILE'" flag; \
 		echo ; \
 		if $(MAKE) BIGFILE=true; then \
-			echo Executing "'all'" complete by using "'BIGFILE'" flag!; \
-		else (echo; echo "'BIGFILE'" exceptions handler failed!; echo; exit 1); \
+			$(PRINTLN) $(call COLOR,Executing 'all' complete by using 'BIGFILE' flag!,yellow); echo; \
+		else echo; $(PRINTLN) $(call COLOR,'BIGFILE' exceptions handler failed!,red); echo; exit 1; \
 		fi \
 	else (exit 1); \
 	fi
