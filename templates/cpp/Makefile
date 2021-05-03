@@ -11,9 +11,9 @@
 
 # sources extension (project language)
 SRCEXT				:= cpp
-# define the compiler to use
+# define the compiler to use (e.g: gcc, c++, ...)
 CCX				= auto
-# define the compiler support version (e.g: 98, 99, 11, 14, 17, 2a)
+# define the compiler support version (e.g: 98, 99, 11, 14, 17, 2a, ...)
 COMPILER_SUPPORT		= auto
 # to compile big sized objects \
 (set to: 'true' if "file too big" exceptions occur, auto to handle it automatically or false to ignore it)
