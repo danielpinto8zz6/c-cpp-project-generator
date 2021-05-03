@@ -258,7 +258,7 @@ $(TARGET_OUTPUT): $(OBJECTS)
 -include $(DEPS)
 
 #builds your objects
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.$(SRCEXT)
 	$(CCX) $(CXXFLAGS) $(BIG_EXP) -c -MMD $< -o $@ $(LFLAGS) $(LIBS) $(INCLUDES)
 
 
