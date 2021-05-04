@@ -10,28 +10,28 @@
 #---------------------------------------------------------------------------------
 
 # sources extension (project language)
-SRCEXT				:= cpp
+SRCEXT			:= cpp
 # define the compiler to use (e.g: gcc, c++, ...)
-CCX				= auto
+CCX			= auto
 # define the compiler support version (e.g: 98, 99, 11, 14, 17, 2a, ...)
-COMPILER_SUPPORT		= auto
+COMPILER_SUPPORT	= auto
 # to compile big sized objects \
 (set to: 'true' if "file too big" exceptions occur, auto to handle it automatically or false to ignore it)
-BIGFILE				= auto
+BIGFILE			= auto
 # get general warnings (set to false to remove general warnings)
-GENERAL_WARNINGS    		:= true
+GENERAL_WARNINGS    	:= true
 # get larger amount of warnings (set to false to remove negligible warnings)
-USE_STRICT 			:= false
+USE_STRICT 		:= false
 
 
 
 # define the executable output name
-TARGET_NAME			:= software
+TARGET_NAME		:= software
 # custom flags:
-LFLAGS 				:=
-CCXFLAGS			:=
+LFLAGS 			:=
+CCXFLAGS		:=
 #debug
-DEBUG				:= -g
+DEBUG			:= -g
 
 # define library paths in addition to /usr/lib
 #   if I wanted to include libraries not in /usr/lib I'd specify
@@ -49,6 +49,10 @@ INCLUDE_DIR_NAME	:= include
 LIB_DIR_NAME		:= lib
 
 
+#display complete info
+DISP_INFO		= false
+
+
 
 
 
@@ -59,6 +63,7 @@ LIB_DIR_NAME		:= lib
 #############################
 #### COMPILER SEGTTINGS #####
 #############################
+
 
 STD = $(subst p,+,$(SRCEXT))
 
@@ -202,10 +207,9 @@ DEPS		= $(OBJECTS:.o=.d)
 # deleting dependencies appended to the file from 'make depend'
 
 # finds all your objects that corrispond to your .cpp files, system agnostic version
-OBJECTS 	:= $(patsubst $(SRC_DIR)/%.$(SRCEXT), $(OBJ_DIR)/%.o, $(wildcard $(SRC_DIR)/*.$(SRCEXT)))
+OBJECTS 	:=	$(patsubst $(SRC_DIR)/%.$(SRCEXT), $(OBJ_DIR)/%.o, $(wildcard $(SRC_DIR)/*.$(SRCEXT)))
 # defining target directory
-TARGET_OUTPUT	= $(call FIXPATH,$(TARGET_DIR)/$(TARGET))
-
+TARGET_OUTPUT	=	$(call FIXPATH,$(TARGET_DIR)/$(TARGET))
 
 
 
@@ -231,6 +235,31 @@ PRINTLN := echo -e
 
 
 #############################
+######### MESSAGES ##########
+#############################
+
+
+#display complete info
+AT		= $(if $(filter true,$(DISP_INFO)),,@)
+#messages
+MESSAGE_0	= $(PRINTLN) $(call COLOR,Executing 'all' complete!,green)
+MESSAGE_1	= $(PRINTLN) $(call COLOR,Warning!,magenta) Attempt to handle "'File too big'" exception by enabling the "'BIGFILE'" flag
+MESSAGE_2	= $(PRINTLN) $(call COLOR,Executing 'all' complete by using 'BIGFILE' flag!,yellow)
+MESSAGE_3	= $(PRINTLN) $(call COLOR,'BIGFILE' exceptions handler failed!,red)
+MESSAGE_4	= echo Removing files..
+MESSAGE_5	= echo Removing directories..
+MESSAGE_6	= echo Cleanup complete!
+MESSAGE_7	= echo Making directories..
+MESSAGE_8	= echo Remake complete!
+MESSAGE_9	= echo Executing 'run: all' complete!
+MESSAGE_10	= echo Compiling object file: $@
+MESSAGE_11	= echo Assebling compiled objects into: $@
+
+
+
+
+
+#############################
 ######### ASSEMBLER #########
 #############################
 
@@ -238,12 +267,13 @@ PRINTLN := echo -e
 # makes build directory, updates your objects, builds your executable
 all: --directories
 	@+$(MAKE) $(TARGET_OUTPUT) \
-	&& $(PRINTLN) $(call COLOR,Executing 'all' complete!,green) \
+	&& echo && $(MESSAGE_0) \
 	|| $(MAKE) -s exp_handler
 
 # updates your objects, builds your executable
 $(TARGET_OUTPUT): $(OBJECTS)
-	$(CCX) $(CXXFLAGS) $^ -o $@ $(LFLAGS) $(LIBS) $(INCLUDES)
+	@echo; $(MESSAGE_11)
+	$(AT) $(CCX) $(CXXFLAGS) $^ -o $@ $(LFLAGS) $(LIBS) $(INCLUDES)
 
 
 
@@ -259,7 +289,8 @@ $(TARGET_OUTPUT): $(OBJECTS)
 
 #builds your objects
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.$(SRCEXT)
-	$(CCX) $(CXXFLAGS) $(BIG_EXP) -c -MMD $< -o $@ $(LFLAGS) $(LIBS) $(INCLUDES)
+	@echo; $(MESSAGE_10)
+	$(AT) $(CCX) $(CXXFLAGS) $(BIG_EXP) -c -MMD $< -o $@ $(LFLAGS) $(LIBS) $(INCLUDES) 
 
 
 
@@ -273,38 +304,37 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.$(SRCEXT)
 #recursive exceptions handler
 exp_handler:
 	@if [ $(BIGFILE) = auto ]; then \
-		echo ;\
-		$(PRINTLN) $(call COLOR,Attempt,magenta) to handle "'File too big'" exception by enabling the "'BIGFILE'" flag; \
-		echo ; \
+		echo ;$(Message_1); echo; \
 		if $(MAKE) BIGFILE=true; then \
-			$(PRINTLN) $(call COLOR,Executing 'all' complete by using 'BIGFILE' flag!,yellow); echo; \
-		else echo; $(PRINTLN) $(call COLOR,'BIGFILE' exceptions handler failed!,red); echo; exit 1; \
+			$(MESSAGE_2); echo; \
+		else echo ;$(MESSAGE_3); echo; exit 1; \
 		fi \
 	else (exit 1); \
 	fi
 
 #Make the Directories
 --directories:
-	$(MD) $(OBJ_DIR) $(TARGET_DIR)
+	@echo; $(MESSAGE_7)
+	$(AT) $(MD) $(OBJ_DIR) $(TARGET_DIR)
 
 #Cean removes all the object and executable files
 clean:
-	@echo Removing files..
-	$(RM) $(TARGET_OUTPUT)
-	$(RM) $(call FIXPATH,$(OBJECTS))
-	$(RM) $(call FIXPATH,$(DEPS))
-	@echo Removing directories..
-	$(RM) -rf $(OBJ_DIR) $(TARGET_DIR)
-	@echo Cleanup complete!
+	@echo; $(MESSAGE_4)
+	$(AT) $(RM) $(TARGET_OUTPUT)
+	$(AT) $(RM) $(call FIXPATH,$(OBJECTS))
+	$(AT) $(RM) $(call FIXPATH,$(DEPS))
+	@echo; $(MESSAGE_5)
+	$(AT) $(RM) -rf $(OBJ_DIR) $(TARGET_DIR)
+	@echo; $(MESSAGE_6)
 
 #Remake does clean and compile all
 remake: clean all
-	@echo Remake complete!
+	@echo; $(MESSAGE_8)
 
 #Run compiles all and runs the executable
 run: all
 	$(TARGET_OUTPUT)
-	@echo Executing 'run: all' complete!
+	@echo; $(MESSAGE_9)
 
 #Help is intended to provide the user a minimum of guide-lines
 help:
