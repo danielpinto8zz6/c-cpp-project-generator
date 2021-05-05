@@ -248,13 +248,15 @@ MESSAGE_0.0	= $(PRINTLN) $(call COLOR,Executing 'all' complete!,green)
 MESSAGE_0.1	= $(PRINTLN) $(call COLOR,Warning!,magenta) Attempt to handle "'File too big'" exception by enabling the "'BIGFILE'" flag
 MESSAGE_0.2	= $(PRINTLN) $(call COLOR,Executing 'all' complete by using 'BIGFILE' flag!,yellow)
 MESSAGE_0.3	= $(PRINTLN) $(call COLOR,'BIGFILE' exceptions handler failed!,red)
+MESSAGE_0.4	= $(PRINTLN) $(call COLOR,Executable,green) "'$(TARGET_OUTPUT)'" $(call COLOR,is already up to date!,green)
 MESSAGE_1.0	= echo Removing files..
 MESSAGE_1.1	= echo Removing directories..
 MESSAGE_1.2	= echo Cleanup complete!
 MESSAGE_2.0	= echo Making directories..
-MESSAGE_2.1	= echo Creating dir: 
-MESSAGE_3.0	= echo Compiling object file: $@
-MESSAGE_3.1	= echo Assebling compiled objects into: $@
+MESSAGE_2.1	= echo Creating dir:
+MESSAGE_3.0	= echo Compilator..
+MESSAGE_3.1	= echo Compiling object file: $@
+MESSAGE_3.2	= echo Assebling compiled objects into: $@
 MESSAGE_4.0	= echo Remake complete!
 MESSAGE_4.1	= echo Executing 'run: all' complete!
 
@@ -269,14 +271,17 @@ MESSAGE_4.1	= echo Executing 'run: all' complete!
 
 # makes build directory, updates your objects, builds your executable
 all: --directories
-	@if $(MAKE) $(-W) $(TARGET_OUTPUT); then \
+	@echo;
+	@if $(MAKE) -q $(TARGET_OUTPUT); then \
+		$(MESSAGE_0.4); \
+	elif $(MESSAGE_3.0) && $(MAKE) $(-W) $(TARGET_OUTPUT); then \
 		echo; $(MESSAGE_0.0); \
 	else $(MAKE) $(-S) exp_handler; \
 	fi
 
 # updates your objects, builds your executable
 $(TARGET_OUTPUT): $(OBJECTS)
-	@echo; $(MESSAGE_3.1)
+	@echo; $(MESSAGE_3.2)
 	$(AT) $(CCX) $(CXXFLAGS) $^ -o $@ $(LFLAGS) $(LIBS) $(INCLUDES)
 
 
@@ -294,7 +299,7 @@ $(TARGET_OUTPUT): $(OBJECTS)
 #builds your objects
 # -MMD generates dependency output files same name as the .o file
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.$(SRCEXT)
-	$(if $(AT),@,@echo;) $(MESSAGE_3.0)
+	$(if $(AT),@,@echo;) $(MESSAGE_3.1)
 	$(AT) $(CCX) $(CXXFLAGS) $(BIG_EXP) -c -MMD $< -o $@ $(LFLAGS) $(LIBS) $(INCLUDES) 
 
 
@@ -324,7 +329,6 @@ exp_handler:
 	$(AT) $(MD) $(OBJ_DIR)
 	@if [ ! -d $(TARGET_DIR) ]; then $(if $(AT),,echo;) $(MESSAGE_2.1) $(TARGET_DIR); fi
 	$(AT) $(MD) $(TARGET_DIR)
-	@echo
 
 #Cean removes all the object and executable files
 clean:
@@ -343,7 +347,7 @@ remake: clean all
 #Run compiles all and runs the executable
 run: all
 	@echo Running the executable: $(TARGET_OUTPUT)
-	@$(TARGET_OUTPUT)
+	$(AT) $(TARGET_OUTPUT)
 	@echo; $(MESSAGE_4.1)
 
 #makefile debugger
