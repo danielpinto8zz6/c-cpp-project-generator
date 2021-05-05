@@ -49,8 +49,8 @@ INCLUDE_DIR_NAME	:= include
 LIB_DIR_NAME		:= lib
 
 
-#display complete info
-DISP_INFO	= false
+#display complete info (this is automatically set to true when "make debug" is called)
+DISP_INFO	= flase
 
 
 
@@ -240,8 +240,8 @@ PRINTLN := echo -e
 
 #display complete info
 AT			= $(if $(filter true,$(DISP_INFO)),,@)
--S			= $(if $(filter true,$(DISP_INFO)),,-s)
--W			= $(if $(filter true,$(DISP_INFO)),-w,--no-print-directory)
+-S			= $(if $(filter true,$(DISP_INFO)),--no-silent,-s)
+-W			= $(if $(filter true,$(DISP_INFO)),--print-directory,--no-print-directory)
 
 #messages
 MESSAGE_0.0	= $(PRINTLN) $(call COLOR,Executing 'all' complete!,green)
@@ -345,6 +345,10 @@ run: all
 	$(TARGET_OUTPUT)
 	@echo; $(MESSAGE_4.1)
 
+#makefile debugger
+debug:
+	$(MAKE) DISP_INFO=true
+
 #Help is intended to provide the user a minimum of guide-lines
 help:
 	@echo
@@ -355,4 +359,4 @@ help:
 	@echo
 
 #Non-File Targets
-.PHONY: all clean remake run help
+.PHONY: all clean remake run debug help
