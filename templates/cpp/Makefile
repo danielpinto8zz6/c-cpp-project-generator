@@ -10,28 +10,28 @@
 #---------------------------------------------------------------------------------
 
 # sources extension (project language)
-SRCEXT			:= cpp
+SRCEXT				:= cpp
 # define the compiler to use (e.g: gcc, c++, ...)
-CCX			= auto
+CCX					= auto
 # define the compiler support version (e.g: 98, 99, 11, 14, 17, 2a, ...)
 COMPILER_SUPPORT	= auto
 # to compile big sized objects \
 (set to: 'true' if "file too big" exceptions occur, auto to handle it automatically or false to ignore it)
-BIGFILE			= auto
+BIGFILE				= auto
 # get general warnings (set to false to remove general warnings)
-GENERAL_WARNINGS    	:= true
+GENERAL_WARNINGS    := true
 # get larger amount of warnings (set to false to remove negligible warnings)
-USE_STRICT 		:= false
+USE_STRICT 			:= false
 
 
 
 # define the executable output name
-TARGET_NAME		:= software
+TARGET_NAME			:= software
 # custom flags:
-LFLAGS 			:=
-CCXFLAGS		:=
+LFLAGS 				:=
+CCXFLAGS			:=
 #debug
-DEBUG			:= -g
+DEBUG				:= -g
 
 # define library paths in addition to /usr/lib
 #   if I wanted to include libraries not in /usr/lib I'd specify
@@ -49,8 +49,9 @@ INCLUDE_DIR_NAME	:= include
 LIB_DIR_NAME		:= lib
 
 
+
 #display complete info
-DISP_INFO		= false
+DISP_INFO	= false
 
 
 
@@ -63,7 +64,6 @@ DISP_INFO		= false
 #############################
 ##### COMPILER SETTINGS #####
 #############################
-
 
 STD = $(subst p,+,$(SRCEXT))
 
@@ -176,8 +176,8 @@ ifeq ($(OS),Windows_NT)
 	INCL_DIRS	:= $(INCLUDE_DIR_NAME)
 	LIB_DIRS	:= $(LIB_DIR_NAME)
 	FIXPATH 	= $1$(subst /,\,$1)
-	RM		= del /q /f
-	MD		:= @mkdir -p
+	RM			= del /q /f
+	MD			:= mkdir -p
 else
 	TARGET		:= $(TARGET_NAME)
 	SRC_DIR		:= $(shell find $(SRC_DIR_NAME) -type d)
@@ -186,8 +186,8 @@ else
 	INCL_DIRS	:= $(shell find $(INCLUDE_DIR_NAME) -type d)
 	LIB_DIRS	:= $(shell find $(LIB_DIR_NAME) -type d)
 	FIXPATH 	= $1
-	RM 		= rm -f
-	MD		:= @mkdir -p
+	RM 			= rm -f
+	MD			:= mkdir -p
 endif
 
 # define any directories containing header files other than /usr/include
@@ -207,7 +207,7 @@ DEPS		= $(OBJECTS:.o=.d)
 # deleting dependencies appended to the file from 'make depend'
 
 # finds all your objects that corrispond to your .cpp files, system agnostic version
-OBJECTS 	:=	$(patsubst $(SRC_DIR)/%.$(SRCEXT), $(OBJ_DIR)/%.o, $(wildcard $(SRC_DIR)/*.$(SRCEXT)))
+OBJECTS 		:= $(patsubst $(SRC_DIR)/%.$(SRCEXT), $(OBJ_DIR)/%.o, $(wildcard $(SRC_DIR)/*.$(SRCEXT)))
 # defining target directory
 TARGET_OUTPUT	=	$(call FIXPATH,$(TARGET_DIR)/$(TARGET))
 
@@ -222,11 +222,11 @@ TARGET_OUTPUT	=	$(call FIXPATH,$(TARGET_DIR)/$(TARGET))
 
 #chose text style
 COLOR = $(if $(filter red,$2),"\e[1;31m$(subst ",,$1)\e[0m",\
-		$(if $(filter green,$2),"\e[1;32m$(subst ",,$1)\e[0m",\
-			$(if $(filter yellow,$2),"\e[1;33m$(subst ",,$1)\e[0m",\
-				$(if $(filter blue,$2),"\e[1;34m$(subst ",,$1)\e[0m",\
-					$(if $(filter magenta,$2),"\e[1;35m$(subst ",,$1)\e[0m",\
-						$(if $(filter cyan,$2),"\e[1;36m$(subst ",,$1)\e[0m",$1))))))
+			$(if $(filter green,$2),"\e[1;32m$(subst ",,$1)\e[0m",\
+				$(if $(filter yellow,$2),"\e[1;33m$(subst ",,$1)\e[0m",\
+					$(if $(filter blue,$2),"\e[1;34m$(subst ",,$1)\e[0m",\
+						$(if $(filter magenta,$2),"\e[1;35m$(subst ",,$1)\e[0m",\
+							$(if $(filter cyan,$2),"\e[1;36m$(subst ",,$1)\e[0m",$1))))))
 #enable echo output styling
 PRINTLN := echo -e
 
@@ -240,7 +240,8 @@ PRINTLN := echo -e
 
 
 #display complete info
-AT		= $(if $(filter true,$(DISP_INFO)),,@)
+AT			= $(if $(filter true,$(DISP_INFO)),,@)
+-S			= $(if $(filter true,$(DISP_INFO)),,-s)
 #messages
 MESSAGE_0	= $(PRINTLN) $(call COLOR,Executing 'all' complete!,green)
 MESSAGE_1	= $(PRINTLN) $(call COLOR,Warning!,magenta) Attempt to handle "'File too big'" exception by enabling the "'BIGFILE'" flag
@@ -266,15 +267,10 @@ MESSAGE_11	= echo Assebling compiled objects into: $@
 
 # makes build directory, updates your objects, builds your executable
 all: --directories
-	@if $(MAKE) $(TARGET_OUTPUT); then \
+	@if $(MAKE) $(-S) $(TARGET_OUTPUT); then \
 		echo; $(MESSAGE_0); \
-	else $(MAKE) exp_handler; \
+	else $(MAKE) $(-S) exp_handler; \
 	fi
-
-# updates your objects, builds your executable
-$(TARGET_OUTPUT): $(OBJECTS)
-	@echo; $(MESSAGE_11)
-	$(AT) $(CCX) $(CXXFLAGS) $^ -o $@ $(LFLAGS) $(LIBS) $(INCLUDES)
 
 # updates your objects, builds your executable
 $(TARGET_OUTPUT): $(OBJECTS)
@@ -294,6 +290,7 @@ $(TARGET_OUTPUT): $(OBJECTS)
 -include $(DEPS)
 
 #builds your objects
+# -MMD generates dependency output files same name as the .o file
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.$(SRCEXT)
 	$(if $(filter @,$(AT)),@,@echo;) $(MESSAGE_10)
 	$(AT) $(CCX) $(CXXFLAGS) $(BIG_EXP) -c -MMD $< -o $@ $(LFLAGS) $(LIBS) $(INCLUDES) 
@@ -329,9 +326,9 @@ clean:
 	$(AT) $(RM) $(TARGET_OUTPUT)
 	$(AT) $(RM) $(call FIXPATH,$(OBJECTS))
 	$(AT) $(RM) $(call FIXPATH,$(DEPS))
-	@echo; $(MESSAGE_5)
+	$(if $(filter @,$(AT)),@,@echo;) $(MESSAGE_5)
 	$(AT) $(RM) -rf $(OBJ_DIR) $(TARGET_DIR)
-	@echo; $(MESSAGE_6)
+	$(if $(filter @,$(AT)),@,@echo;) $(MESSAGE_6)
 
 #Remake does clean and compile all
 remake: clean all
