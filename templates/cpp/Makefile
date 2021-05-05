@@ -61,7 +61,7 @@ DISP_INFO		= false
 #---------------------------------------------------------------------------------
 
 #############################
-#### COMPILER SEGTTINGS #####
+##### COMPILER SETTINGS #####
 #############################
 
 
@@ -266,9 +266,15 @@ MESSAGE_11	= echo Assebling compiled objects into: $@
 
 # makes build directory, updates your objects, builds your executable
 all: --directories
-	@+$(MAKE) $(TARGET_OUTPUT) \
-	&& echo && $(MESSAGE_0) \
-	|| $(MAKE) -s exp_handler
+	@if $(MAKE) $(TARGET_OUTPUT); then \
+		echo; $(MESSAGE_0); \
+	else $(MAKE) exp_handler; \
+	fi
+
+# updates your objects, builds your executable
+$(TARGET_OUTPUT): $(OBJECTS)
+	@echo; $(MESSAGE_11)
+	$(AT) $(CCX) $(CXXFLAGS) $^ -o $@ $(LFLAGS) $(LIBS) $(INCLUDES)
 
 # updates your objects, builds your executable
 $(TARGET_OUTPUT): $(OBJECTS)
@@ -289,7 +295,7 @@ $(TARGET_OUTPUT): $(OBJECTS)
 
 #builds your objects
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.$(SRCEXT)
-	@echo; $(MESSAGE_10)
+	$(if $(filter @,$(AT)),@,@echo;) $(MESSAGE_10)
 	$(AT) $(CCX) $(CXXFLAGS) $(BIG_EXP) -c -MMD $< -o $@ $(LFLAGS) $(LIBS) $(INCLUDES) 
 
 
@@ -304,10 +310,10 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.$(SRCEXT)
 #recursive exceptions handler
 exp_handler:
 	@if [ $(BIGFILE) = auto ]; then \
-		echo ;$(Message_1); echo; \
+		echo; $(MESSAGE_1); echo; \
 		if $(MAKE) BIGFILE=true; then \
 			$(MESSAGE_2); echo; \
-		else echo ;$(MESSAGE_3); echo; exit 1; \
+		else echo; $(MESSAGE_3); echo; exit 1; \
 		fi \
 	else (exit 1); \
 	fi
