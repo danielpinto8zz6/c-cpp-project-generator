@@ -241,6 +241,8 @@ PRINTLN := echo -e
 #display complete info
 AT			= $(if $(filter true,$(DISP_INFO)),,@)
 -S			= $(if $(filter true,$(DISP_INFO)),,-s)
+-W			= $(if $(filter true,$(DISP_INFO)),-w,--no-print-directory)
+
 #messages
 MESSAGE_0.0	= $(PRINTLN) $(call COLOR,Executing 'all' complete!,green)
 MESSAGE_0.1	= $(PRINTLN) $(call COLOR,Warning!,magenta) Attempt to handle "'File too big'" exception by enabling the "'BIGFILE'" flag
@@ -267,7 +269,7 @@ MESSAGE_4.1	= echo Executing 'run: all' complete!
 
 # makes build directory, updates your objects, builds your executable
 all: --directories
-	@if $(MAKE) $(-S) $(TARGET_OUTPUT); then \
+	@if $(MAKE) $(-W) $(TARGET_OUTPUT); then \
 		echo; $(MESSAGE_0.0); \
 	else $(MAKE) $(-S) exp_handler; \
 	fi
