@@ -49,7 +49,6 @@ INCLUDE_DIR_NAME	:= include
 LIB_DIR_NAME		:= lib
 
 
-
 #display complete info
 DISP_INFO	= false
 
@@ -243,18 +242,19 @@ PRINTLN := echo -e
 AT			= $(if $(filter true,$(DISP_INFO)),,@)
 -S			= $(if $(filter true,$(DISP_INFO)),,-s)
 #messages
-MESSAGE_0	= $(PRINTLN) $(call COLOR,Executing 'all' complete!,green)
-MESSAGE_1	= $(PRINTLN) $(call COLOR,Warning!,magenta) Attempt to handle "'File too big'" exception by enabling the "'BIGFILE'" flag
-MESSAGE_2	= $(PRINTLN) $(call COLOR,Executing 'all' complete by using 'BIGFILE' flag!,yellow)
-MESSAGE_3	= $(PRINTLN) $(call COLOR,'BIGFILE' exceptions handler failed!,red)
-MESSAGE_4	= echo Removing files..
-MESSAGE_5	= echo Removing directories..
-MESSAGE_6	= echo Cleanup complete!
-MESSAGE_7	= echo Making directories..
-MESSAGE_8	= echo Remake complete!
-MESSAGE_9	= echo Executing 'run: all' complete!
-MESSAGE_10	= echo Compiling object file: $@
-MESSAGE_11	= echo Assebling compiled objects into: $@
+MESSAGE_0.0	= $(PRINTLN) $(call COLOR,Executing 'all' complete!,green)
+MESSAGE_0.1	= $(PRINTLN) $(call COLOR,Warning!,magenta) Attempt to handle "'File too big'" exception by enabling the "'BIGFILE'" flag
+MESSAGE_0.2	= $(PRINTLN) $(call COLOR,Executing 'all' complete by using 'BIGFILE' flag!,yellow)
+MESSAGE_0.3	= $(PRINTLN) $(call COLOR,'BIGFILE' exceptions handler failed!,red)
+MESSAGE_1.0	= echo Removing files..
+MESSAGE_1.1	= echo Removing directories..
+MESSAGE_1.2	= echo Cleanup complete!
+MESSAGE_2.0	= echo Making directories..
+MESSAGE_2.1	= echo Creating dir: 
+MESSAGE_3.0	= echo Compiling object file: $@
+MESSAGE_3.1	= echo Assebling compiled objects into: $@
+MESSAGE_4.0	= echo Remake complete!
+MESSAGE_4.1	= echo Executing 'run: all' complete!
 
 
 
@@ -268,13 +268,13 @@ MESSAGE_11	= echo Assebling compiled objects into: $@
 # makes build directory, updates your objects, builds your executable
 all: --directories
 	@if $(MAKE) $(-S) $(TARGET_OUTPUT); then \
-		echo; $(MESSAGE_0); \
+		echo; $(MESSAGE_0.0); \
 	else $(MAKE) $(-S) exp_handler; \
 	fi
 
 # updates your objects, builds your executable
 $(TARGET_OUTPUT): $(OBJECTS)
-	@echo; $(MESSAGE_11)
+	@echo; $(MESSAGE_3.1)
 	$(AT) $(CCX) $(CXXFLAGS) $^ -o $@ $(LFLAGS) $(LIBS) $(INCLUDES)
 
 
@@ -292,7 +292,7 @@ $(TARGET_OUTPUT): $(OBJECTS)
 #builds your objects
 # -MMD generates dependency output files same name as the .o file
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.$(SRCEXT)
-	$(if $(filter @,$(AT)),@,@echo;) $(MESSAGE_10)
+	$(if $(AT),@,@echo;) $(MESSAGE_3.0)
 	$(AT) $(CCX) $(CXXFLAGS) $(BIG_EXP) -c -MMD $< -o $@ $(LFLAGS) $(LIBS) $(INCLUDES) 
 
 
@@ -307,37 +307,41 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.$(SRCEXT)
 #recursive exceptions handler
 exp_handler:
 	@if [ $(BIGFILE) = auto ]; then \
-		echo; $(MESSAGE_1); echo; \
+		echo; $(MESSAGE_0.1); echo; \
 		if $(MAKE) BIGFILE=true; then \
-			$(MESSAGE_2); echo; \
-		else echo; $(MESSAGE_3); echo; exit 1; \
+			$(MESSAGE_0.2); echo; \
+		else echo; $(MESSAGE_0.3); echo; exit 1; \
 		fi \
 	else (exit 1); \
 	fi
 
 #Make the Directories
 --directories:
-	@echo; $(MESSAGE_7)
-	$(AT) $(MD) $(OBJ_DIR) $(TARGET_DIR)
+	@if [ ! -d $(OBJ_DIR) ] || [ ! -d $(TARGET_DIR) ]; then echo; $(MESSAGE_2.0); fi
+	@if [ ! -d $(OBJ_DIR) ]; then $(MESSAGE_2.1) $(OBJ_DIR); fi
+	$(AT) $(MD) $(OBJ_DIR)
+	@if [ ! -d $(TARGET_DIR) ]; then $(if $(AT),,echo;) $(MESSAGE_2.1) $(TARGET_DIR); fi
+	$(AT) $(MD) $(TARGET_DIR)
+	@echo
 
 #Cean removes all the object and executable files
 clean:
-	@echo; $(MESSAGE_4)
+	@echo; $(MESSAGE_1.0)
 	$(AT) $(RM) $(TARGET_OUTPUT)
 	$(AT) $(RM) $(call FIXPATH,$(OBJECTS))
 	$(AT) $(RM) $(call FIXPATH,$(DEPS))
-	$(if $(filter @,$(AT)),@,@echo;) $(MESSAGE_5)
+	$(if $(AT),@,@echo;) $(MESSAGE_1.1)
 	$(AT) $(RM) -rf $(OBJ_DIR) $(TARGET_DIR)
-	$(if $(filter @,$(AT)),@,@echo;) $(MESSAGE_6)
+	$(if $(AT),@,@echo;) $(MESSAGE_1.2)
 
 #Remake does clean and compile all
 remake: clean all
-	@echo; $(MESSAGE_8)
+	@echo; $(MESSAGE_4.0)
 
 #Run compiles all and runs the executable
 run: all
 	$(TARGET_OUTPUT)
-	@echo; $(MESSAGE_9)
+	@echo; $(MESSAGE_4.1)
 
 #Help is intended to provide the user a minimum of guide-lines
 help:
