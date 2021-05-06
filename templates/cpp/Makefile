@@ -371,7 +371,7 @@ help:
 	@echo "make remake - remake consist of cleaning and compileing all"
 	@echo "make run    - builds/updates everything, runs immediately"
 	@$(PRINTLN) make run?.. - unlike \'run\', it allows passing arguments to the executable \
-		\(e.g: $(call COLOR,make,yellow) run?MyArguments OR $(call COLOR,make,yellow) run?'My Arguments'\)
+		\(e.g: $(call COLOR,make,yellow) run?MyArguments OR $(call COLOR,make,yellow) run?\'My Arguments\'\)
 	@echo "make debug  - builds/updates everything displaying more detailed messages"
 	@echo
 
