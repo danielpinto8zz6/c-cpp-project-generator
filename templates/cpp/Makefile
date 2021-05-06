@@ -253,10 +253,11 @@ MESSAGE_1.1	= echo Removing directories..
 MESSAGE_1.2	= echo Cleanup complete!
 MESSAGE_2.0	= echo Making directories..
 MESSAGE_2.1	= echo Compilator..
-MESSAGE_2.3	= $(PRINTLN) $(call COLOR,Warning!,magenta) Attempt to handle "'File too big'" exception by enabling the "'BIGFILE'" flag..
+MESSAGE_2.2	= $(PRINTLN) $(call COLOR,Warning!,magenta) Attempt to handle "'File too big'" exception by enabling the "'BIGFILE'" flag..
 MESSAGE_3.0	= echo Creating dir:
 MESSAGE_3.1	= echo Compiling object file: $@
-MESSAGE_3.2	= echo Assebling compiled objects into: $@
+MESSAGE_3.2	= echo Assembling compiled objects into: $@
+MESSAGE_3.3 = echo Running the executable: $(TARGET_OUTPUT)
 MESSAGE_4.0	= echo Remake complete!
 MESSAGE_4.1	= echo Executing 'run: all' complete!
 
@@ -314,7 +315,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.$(SRCEXT)
 #recursive exceptions handler
 exp_handler:
 	@if [ $(BIGFILE) = auto ]; then \
-		echo; $(MESSAGE_2.3); echo; \
+		echo; $(MESSAGE_2.2); echo; \
 		if $(MAKE) BIGFILE=true; then \
 			$(MESSAGE_0.1); echo; \
 		else echo; $(MESSAGE_0.2); echo; exit 1; \
@@ -327,7 +328,7 @@ exp_handler:
 	@if [ ! -d $(OBJ_DIR) ] || [ ! -d $(TARGET_DIR) ]; then echo; $(MESSAGE_2.0); fi
 	@if [ ! -d $(OBJ_DIR) ]; then $(MESSAGE_3.0) $(OBJ_DIR); fi
 	$(AT) $(MD) $(OBJ_DIR)
-	@if [ ! -d $(TARGET_DIR) ]; then $(if $(AT),,echo;) $(MESSAGE_2.1) $(TARGET_DIR); fi
+	@if [ ! -d $(TARGET_DIR) ]; then $(if $(AT),,echo;) $(MESSAGE_3.0) $(TARGET_DIR); fi
 	$(AT) $(MD) $(TARGET_DIR)
 
 #Cean removes all the object and executable files
@@ -346,9 +347,17 @@ remake: clean all
 
 #Run compiles all and runs the executable
 run: all
-	@echo Running the executable: $(TARGET_OUTPUT)
+	@$(MESSAGE_3.3)
 	$(AT) $(TARGET_OUTPUT)
 	@echo; $(MESSAGE_4.1)
+
+#run by passing arguments to the "main"
+run?%:
+	@$(if $(subst run?,,$@),\
+		$(MAKE) $(-W) all &&\
+		$(MESSAGE_3.3) $(subst run?,,$@) &&\
+		$(TARGET_OUTPUT) $(subst run?,,$@) &&\
+		echo && $(MESSAGE_4.1),)
 
 #makefile debugger
 debug:
@@ -361,7 +370,10 @@ help:
 	@echo "make clean  - removes object file folder and executable"
 	@echo "make remake - remake consist of cleaning and compileing all"
 	@echo "make run    - builds/updates everything, runs immediately"
+	@$(PRINTLN) make run?.. - unlike \'run\', it allows passing arguments to the executable \
+		\(e.g: $(call COLOR,make,yellow) run?MyArguments OR $(call COLOR,make,yellow) run?'My Arguments'\)
+	@echo "make debug  - builds/updates everything displaying more detailed messages"
 	@echo
 
 #Non-File Targets
-.PHONY: all clean remake run debug help
+.PHONY: all clean remake run run? run?% debug help
