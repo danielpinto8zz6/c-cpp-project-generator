@@ -173,7 +173,7 @@ CXXFLAGS	= -std=$(STD)$(COMPILER_SUPPORT) $(OPT) -Wall $(CCXFLAGS) $(CWARNS) $(D
 
 # automatically generate target name copying it from main file name
 ifeq ($(subst auto,,$(TARGET_NAME)),)
-	MAIN_MATCH	:= "^(\s)*(unsigned)?(void|bool|short|int|long|long long|double|char) main\s*\((\s|\S)*\)\s*\{?"
+	MAIN_MATCH	:= "^(\s)*(unsigned\s+)?(void|bool|short|int|long|long\s+long|double|char)\s+main\s*\((\s|\S)*\)\s*\{?"
 	MAIN_PATH	= $(shell egrep -E --include=\*.$(SRCEXT) -rnl $(SRC_DIR) -e $(MAIN_MATCH))
 	MAIN_NAME	= $(basename $(notdir $(MAIN_PATH)))
 	TARGET_NAME	= $(if $(MAIN_NAME),$(MAIN_NAME),a)
