@@ -229,6 +229,9 @@ COLOR = $(if $(filter red,$2),"\e[1;31m$(subst ",,$1)\e[0m",\
 #enable echo output styling
 PRINTLN := echo -e
 
+#recipe debug
+RECIPE_DEBUG = $(if $(AT),,echo $1) $1
+
 
 
 
@@ -248,18 +251,20 @@ MESSAGE_0.0	= $(PRINTLN) $(call COLOR,Executing 'all' complete!,green)
 MESSAGE_0.1	= $(PRINTLN) $(call COLOR,Executing 'all' complete by using 'BIGFILE' flag!,yellow)
 MESSAGE_0.2	= $(PRINTLN) $(call COLOR,'BIGFILE' exceptions handler failed!,red)
 MESSAGE_0.3	= $(PRINTLN) $(call COLOR,Executable,green) "'$(TARGET_OUTPUT)'" $(call COLOR,is already up to date!,green)
-MESSAGE_1.0	= echo Removing files..
-MESSAGE_1.1	= echo Removing directories..
-MESSAGE_1.2	= echo Cleanup complete!
-MESSAGE_2.0	= echo Making directories..
-MESSAGE_2.1	= echo Compilator..
-MESSAGE_2.2	= $(PRINTLN) $(call COLOR,Warning!,magenta) Attempt to handle "'File too big'" exception by enabling the "'BIGFILE'" flag..
-MESSAGE_3.0	= echo Creating dir:
-MESSAGE_3.1	= echo Compiling object file: $@
-MESSAGE_3.2	= echo Assembling compiled objects into: $@
-MESSAGE_3.3 = echo Running the executable: $(TARGET_OUTPUT)
-MESSAGE_4.0	= echo Remake complete!
-MESSAGE_4.1	= echo Executing 'run: all' complete!
+MESSAGE_1.0	= $(PRINTLN) $(call COLOR,Removing files..,blue)
+MESSAGE_1.1	= $(PRINTLN) $(call COLOR,Removing directories..,blue)
+MESSAGE_1.2	= $(PRINTLN) $(call COLOR,Making directories..,blue)
+MESSAGE_1.3	= $(PRINTLN) $(call COLOR,Compilator..,blue)
+MESSAGE_1.4	= $(PRINTLN) $(call COLOR,Warning!,magenta) Attempt to handle "'File too big'" exception by enabling the "'BIGFILE'" flag..
+MESSAGE_2.0	= echo Creating dir:
+MESSAGE_2.1	= echo Compiling object file: $@
+MESSAGE_2.2	= echo Assembling compiled objects into: $@
+MESSAGE_2.3	= echo Running the executable: $(TARGET_OUTPUT)
+MESSAGE_2.4	= echo Removing:
+MESSAGE_3.0	= echo Cleanup complete!
+MESSAGE_3.1	= echo Nothing to be deleted!
+MESSAGE_3.2	= echo Remake complete!
+MESSAGE_3.3	= echo Executing 'run: all' complete!
 
 
 
@@ -275,14 +280,14 @@ all: --directories
 	@echo;
 	@if $(MAKE) -q $(TARGET_OUTPUT); then \
 		$(MESSAGE_0.3); \
-	elif $(MESSAGE_2.1) && $(MAKE) $(-W) $(TARGET_OUTPUT); then \
+	elif $(MESSAGE_1.3) && $(MAKE) $(-W) $(TARGET_OUTPUT); then \
 		echo; $(MESSAGE_0.0); \
 	else $(MAKE) $(-S) exp_handler; \
 	fi
 
 # updates your objects, builds your executable
 $(TARGET_OUTPUT): $(OBJECTS)
-	@echo; $(MESSAGE_3.2)
+	@echo; $(MESSAGE_2.2)
 	$(AT) $(CCX) $(CXXFLAGS) $^ -o $@ $(LFLAGS) $(LIBS) $(INCLUDES)
 
 
@@ -300,7 +305,7 @@ $(TARGET_OUTPUT): $(OBJECTS)
 #builds your objects
 # -MMD generates dependency output files same name as the .o file
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.$(SRCEXT)
-	$(if $(AT),@,@echo;) $(MESSAGE_3.1)
+	$(if $(AT),@,@echo;) $(MESSAGE_2.1)
 	$(AT) $(CCX) $(CXXFLAGS) $(BIG_EXP) -c -MMD $< -o $@ $(LFLAGS) $(LIBS) $(INCLUDES) 
 
 
@@ -315,7 +320,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.$(SRCEXT)
 #recursive exceptions handler
 exp_handler:
 	@if [ $(BIGFILE) = auto ]; then \
-		echo; $(MESSAGE_2.2); echo; \
+		echo; $(MESSAGE_1.4); echo; \
 		if $(MAKE) BIGFILE=true; then \
 			$(MESSAGE_0.1); echo; \
 		else echo; $(MESSAGE_0.2); echo; exit 1; \
@@ -325,39 +330,55 @@ exp_handler:
 
 #Make the Directories
 --directories:
-	@if [ ! -d $(OBJ_DIR) ] || [ ! -d $(TARGET_DIR) ]; then echo; $(MESSAGE_2.0); fi
-	@if [ ! -d $(OBJ_DIR) ]; then $(MESSAGE_3.0) $(OBJ_DIR); fi
-	$(AT) $(MD) $(OBJ_DIR)
-	@if [ ! -d $(TARGET_DIR) ]; then $(if $(AT),,echo;) $(MESSAGE_3.0) $(TARGET_DIR); fi
-	$(AT) $(MD) $(TARGET_DIR)
+	@if [ ! -d $(OBJ_DIR) ] || [ ! -d $(TARGET_DIR) ]; then echo; $(MESSAGE_1.2); fi
+	@if [ ! -d $(OBJ_DIR) ]; then \
+		$(if $(AT),,echo;) \
+		$(MESSAGE_2.0) $(OBJ_DIR); \
+		$(call RECIPE_DEBUG, $(MD) $(OBJ_DIR);) \
+	fi
+	@if [ ! -d $(TARGET_DIR) ]; then \
+		$(if $(AT),,echo;) \
+		$(MESSAGE_2.0) $(TARGET_DIR); \
+		$(call RECIPE_DEBUG, $(MD) $(TARGET_DIR);) \
+	fi
 
 #Cean removes all the object and executable files
 clean:
-	@echo; $(MESSAGE_1.0)
-	$(AT) $(RM) $(TARGET_OUTPUT)
-	$(AT) $(RM) $(call FIXPATH,$(OBJECTS))
-	$(AT) $(RM) $(call FIXPATH,$(DEPS))
-	$(if $(AT),@,@echo;) $(MESSAGE_1.1)
-	$(AT) $(RM) -rf $(OBJ_DIR) $(TARGET_DIR)
-	$(if $(AT),@,@echo;) $(MESSAGE_1.2)
+	@echo; 
+	@if [ -d $(OBJ_DIR) ] || [ -d $(TARGET_DIR) ]; then \
+		$(MESSAGE_1.0); \
+		$(MESSAGE_2.4) $(TARGET_OUTPUT); \
+		$(call RECIPE_DEBUG, $(RM) $(TARGET_OUTPUT);) \
+		$(MESSAGE_2.4) $(call FIXPATH,$(OBJECTS)); \
+		$(call RECIPE_DEBUG, $(RM) $(call FIXPATH,$(OBJECTS));) \
+		$(MESSAGE_2.4) $(call FIXPATH,$(DEPS)); \
+		$(call RECIPE_DEBUG, $(RM) $(call FIXPATH,$(DEPS));) \
+		echo; $(MESSAGE_1.1); \
+		$(MESSAGE_2.4) $(OBJ_DIR) $(TARGET_DIR); \
+		$(call RECIPE_DEBUG, $(RM) -rf $(OBJ_DIR) $(TARGET_DIR);) \
+		echo; $(MESSAGE_3.0); \
+	else $(MESSAGE_3.1); \
+	fi
 
 #Remake does clean and compile all
 remake: clean all
-	@echo; $(MESSAGE_4.0)
+	@echo; $(MESSAGE_3.2)
 
 #Run compiles all and runs the executable
 run: all
-	@$(MESSAGE_3.3)
+	@$(MESSAGE_2.3)
 	$(AT) $(TARGET_OUTPUT)
-	@echo; $(MESSAGE_4.1)
+	@echo; $(MESSAGE_3.3)
 
-#run by passing arguments to the "main"
+#run by passing arguments to the "main" \
+( previously used to remove last letter: $(shell head -c-2 <<< $@) ) \
+( previously used to remove first letter: $(shell cut -c2- <<< "$@")) )
 run?%:
 	@$(if $(subst run?,,$@),\
 		$(MAKE) $(-W) all &&\
-		$(MESSAGE_3.3) $(subst run?,,$@) &&\
+		$(MESSAGE_2.3) $(subst run?,,$@) &&\
 		$(TARGET_OUTPUT) $(subst run?,,$@) &&\
-		echo && $(MESSAGE_4.1),)
+		echo && $(MESSAGE_3.3),)
 
 #makefile debugger
 debug:
@@ -368,10 +389,10 @@ help:
 	@echo
 	@echo "make        - builds/updates everything, is ready to run with $(TARGET_OUTPUT) after completion"
 	@echo "make clean  - removes object file folder and executable"
-	@echo "make remake - remake consist of cleaning and compileing all"
+	@echo "make remake - remake consist of cleaning and compiling all"
 	@echo "make run    - builds/updates everything, runs immediately"
 	@$(PRINTLN) make run?.. - unlike \'run\', it allows passing arguments to the executable \
-		\(e.g: $(call COLOR,make,yellow) run?MyArguments OR $(call COLOR,make,yellow) run?\'My Arguments\'\)
+		\(e.g: $(call COLOR,make,yellow) run?\'My Arguments\' OR $(call COLOR,make,yellow) run?MyArguments\)
 	@echo "make debug  - builds/updates everything displaying more detailed messages"
 	@echo
 
