@@ -1,8 +1,8 @@
 #	INSTRUCTIONS:
 # 'make'        build executable file 'main'
 # 'make run'    build and run executable file
-# 'make run?..  unlike 'run', it allows passing arguments to the executable (e.g: make run?MyArgs OR make run?'My Arguments')
-# 'make clean'  removes all .o and executable files
+# 'make run?..  unlike 'run', it allows passing arguments to the executable (e.g: make run?MyArgs OR make run?'My Args')
+# 'make clean'  removes every .o and executable files
 # 'make remake' execute a make clean and subsequently compile all
 # 'make help'   show brief guide-lines about this makefile usage
 
@@ -16,9 +16,9 @@ SRCEXT				:= cpp
 CCX					= auto
 # define the compiler support version (e.g: 98, 99, 11, 14, 17, 2a, ...)
 COMPILER_SUPPORT	= auto
-# to compile big sized objects \
-(set to: 'true' if "file too big" exceptions occur, auto to handle it automatically or false to ignore it)
-BIGFILE				= auto
+# to compile and optimize code \
+(set to 'true' to get optimizer -Ofast, 'auto' to handle it automatically or any optimizer else, like -O0, -O1, -O2, -O3, ...)
+OPTIMIZER			= auto
 # get general warnings (set to false to remove general warnings)
 GENERAL_WARNINGS    := true
 # get larger amount of warnings (set to false to remove negligible warnings)
@@ -27,7 +27,7 @@ USE_STRICT 			:= false
 
 
 # define the executable output name
-TARGET_NAME			:= software
+TARGET_NAME			:= librarySystem
 # custom flags:
 LFLAGS 				:=
 CCXFLAGS			:=
@@ -51,7 +51,7 @@ LIB_DIR_NAME		:= lib
 
 
 # display complete info (this is automatically set to true when "make debug" is called)
-DISP_INFO	= flase
+DISP_INFO			= false
 
 
 
@@ -78,9 +78,13 @@ ifeq  ($(subst auto,,$(CCX)),)
 	endif
 endif
 
-# define the 'big sized objects' handler
-ifeq ($(BIGFILE),true)
-	BIG_EXP := -Wa,-mbig-obj
+# define the 'optimizer'
+ifeq ($(OPTIMIZER),true)
+	OPT := -Ofast
+else ifeq ($(OPTIMIZER),auto)
+	OPT := -Og
+else 
+	OPT := $(OPTIMIZER)
 endif
 
 # define the lang support version
@@ -156,7 +160,7 @@ endif
 
 
 # define any compile-time flags
-CXXFLAGS	= -std=$(STD)$(COMPILER_SUPPORT) -Wall $(CCXFLAGS) $(CWARNS) $(DEBUG)
+CXXFLAGS	= -std=$(STD)$(COMPILER_SUPPORT) $(OPT) -Wall $(CCXFLAGS) $(CWARNS) $(DEBUG)
 
 
 
@@ -177,7 +181,7 @@ ifeq ($(OS),Windows_NT)
 	LIB_DIRS	:= $(LIB_DIR_NAME)
 	FIXPATH 	= $1$(subst /,\,$1)
 	RM			= del /q /f
-	MD			:= mkdir -p
+	MD			:= mkdir
 else
 	TARGET		:= $(TARGET_NAME)
 	SRC_DIR		:= $(shell find $(SRC_DIR_NAME) -type d)
@@ -220,7 +224,7 @@ TARGET_OUTPUT	=	$(call FIXPATH,$(TARGET_DIR)/$(TARGET))
 #############################
 
 
-# choose text style
+# chose text style
 COLOR = $(if $(filter red,$2),"\e[1;31m$(subst ",,$1)\e[0m",\
 			$(if $(filter green,$2),"\e[1;32m$(subst ",,$1)\e[0m",\
 				$(if $(filter yellow,$2),"\e[1;33m$(subst ",,$1)\e[0m",\
@@ -243,32 +247,32 @@ RECIPE_DEBUG = $(if $(AT),,echo $1) $1
 
 
 # display complete info
-AT			= $(if $(filter true,$(DISP_INFO)),,@)
--S			= $(if $(filter true,$(DISP_INFO)),--no-silent,-s)
--W			= $(if $(filter true,$(DISP_INFO)),--print-directory,--no-print-directory)
+AT			:= $(if $(filter true,$(DISP_INFO)),,@)
+-S			:= $(if $(filter true,$(DISP_INFO)),--no-silent,-s)
+-W			:= $(if $(filter true,$(DISP_INFO)),--print-directory,--no-print-directory)
 
 # footer messages
-MESSAGE_0.0	= $(PRINTLN) $(call COLOR,Executing 'all' complete!,green)
-MESSAGE_0.1	= $(PRINTLN) $(call COLOR,Executing 'all' complete by using 'BIGFILE' flag!,yellow)
-MESSAGE_0.2	= $(PRINTLN) $(call COLOR,'BIGFILE' exceptions handler failed!,red)
-MESSAGE_0.3	= $(PRINTLN) $(call COLOR,Executable,green) "'$(TARGET_OUTPUT)'" $(call COLOR,is already up to date!,green)
+MESSAGE_0.0	:= $(PRINTLN) $(call COLOR,Executing 'all' complete!,green)
+MESSAGE_0.1	:= $(PRINTLN) $(call COLOR,Executing 'all' complete by using '-Ofast' optimizer flag!,yellow)
+MESSAGE_0.2	:= $(PRINTLN) $(call COLOR,Exceptions handler failed!,red)
+MESSAGE_0.3	:= $(PRINTLN) $(call COLOR,Executable,green) "'$(TARGET_OUTPUT)'" $(call COLOR,is already up to date!,green)
 # header messages
-MESSAGE_1.0	= $(PRINTLN) $(call COLOR,Removing files..,blue)
-MESSAGE_1.1	= $(PRINTLN) $(call COLOR,Removing directories..,blue)
-MESSAGE_1.2	= $(PRINTLN) $(call COLOR,Making directories..,blue)
-MESSAGE_1.3	= $(PRINTLN) $(call COLOR,Compilator..,blue)
-MESSAGE_1.4	= $(PRINTLN) $(call COLOR,Warning!,magenta) Attempt to handle "'File too big'" exception by enabling the "'BIGFILE'" flag..
+MESSAGE_1.0	:= $(PRINTLN) $(call COLOR,Removing files..,blue)
+MESSAGE_1.1	:= $(PRINTLN) $(call COLOR,Removing directories..,blue)
+MESSAGE_1.2	:= $(PRINTLN) $(call COLOR,Making directories..,blue)
+MESSAGE_1.3	:= $(PRINTLN) $(call COLOR,Compilator..,blue)
+MESSAGE_1.4	:= $(PRINTLN) $(call COLOR,Warning!,magenta) Attempt to handle the exception by enabling the "'-Ofast'" optimizer flag..
 # body messages
-MESSAGE_2.0	= echo Creating dir:
-MESSAGE_2.1	= echo Compiling object file: $@
-MESSAGE_2.2	= echo Assembling compiled objects into: $@
-MESSAGE_2.3	= echo Running the executable: $(TARGET_OUTPUT)
-MESSAGE_2.4	= echo Removing:
+MESSAGE_2.0	:= echo Creating dir:
+MESSAGE_2.1	:= echo Compiling object file: $@
+MESSAGE_2.2	:= echo Assembling compiled objects into: $@
+MESSAGE_2.3	:= echo Running the executable: $(TARGET_OUTPUT)
+MESSAGE_2.4	:= echo Removing:
 # footer messages
-MESSAGE_3.0	= echo Cleanup complete!
-MESSAGE_3.1	= echo Nothing to be deleted!
-MESSAGE_3.2	= echo Remake complete!
-MESSAGE_3.3	= echo Executing 'run: all' complete!
+MESSAGE_3.0	:= echo Cleanup complete!
+MESSAGE_3.1	:= echo Nothing to be deleted!
+MESSAGE_3.2	:= echo Remake complete!
+MESSAGE_3.3	:= echo Executing 'run: all' complete!
 
 
 
@@ -310,7 +314,7 @@ $(TARGET_OUTPUT): $(OBJECTS)
 # -MMD generates dependency output files same name as the .o file
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.$(SRCEXT)
 	$(if $(AT),@,@echo;) $(MESSAGE_2.1)
-	$(AT) $(CCX) $(CXXFLAGS) $(BIG_EXP) -c -MMD $< -o $@ $(LFLAGS) $(LIBS) $(INCLUDES) 
+	$(AT) $(CCX) $(CXXFLAGS) -c -MMD $< -o $@ $(LFLAGS) $(LIBS) $(INCLUDES) 
 
 
 
@@ -323,9 +327,9 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.$(SRCEXT)
 
 # recursive exceptions handler
 exp_handler:
-	@if [ $(BIGFILE) = auto ]; then \
+	@if [ $(OPTIMIZER) = auto ]; then \
 		echo; $(MESSAGE_1.4); echo; \
-		if $(MAKE) BIGFILE=true; then \
+		if $(MAKE) OPTIMIZER=true; then \
 			$(MESSAGE_0.1); echo; \
 		else echo; $(MESSAGE_0.2); echo; exit 1; \
 		fi \
@@ -346,7 +350,7 @@ exp_handler:
 		$(call RECIPE_DEBUG, $(MD) $(TARGET_DIR);) \
 	fi
 
-# Cean removes all the object and executable files
+# Clean removes all the object and executable files
 clean:
 	@echo; 
 	@if [ -d $(OBJ_DIR) ] || [ -d $(TARGET_DIR) ]; then \
