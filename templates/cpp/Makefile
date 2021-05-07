@@ -371,8 +371,6 @@ run: all
 	@echo; $(MESSAGE_3.3)
 
 #run by passing arguments to the "main" \
-( previously used to remove last letter: $(shell head -c-2 <<< $@) ) \
-( previously used to remove first letter: $(shell cut -c2- <<< "$@")) )
 run?%:
 	@$(if $(subst run?,,$@),\
 		$(MAKE) $(-W) all &&\
