@@ -247,15 +247,15 @@ RECIPE_DEBUG = $(if $(AT),,echo $1) $1
 
 
 # display complete info
-AT			:= $(if $(filter true,$(DISP_INFO)),,@)
--S			:= $(if $(filter true,$(DISP_INFO)),--no-silent,-s)
--W			:= $(if $(filter true,$(DISP_INFO)),--print-directory,--no-print-directory)
+AT			= $(if $(filter true,$(DISP_INFO)),,@)
+-S			= $(if $(filter true,$(DISP_INFO)),--no-silent,-s)
+-W			= $(if $(filter true,$(DISP_INFO)),--print-directory,--no-print-directory)
 
 # footer messages
 MESSAGE_0.0	:= $(PRINTLN) $(call COLOR,Executing 'all' complete!,green)
 MESSAGE_0.1	:= $(PRINTLN) $(call COLOR,Executing 'all' complete by using '-Ofast' optimizer flag!,yellow)
 MESSAGE_0.2	:= $(PRINTLN) $(call COLOR,Exceptions handler failed!,red)
-MESSAGE_0.3	:= $(PRINTLN) $(call COLOR,Executable,green) "'$(TARGET_OUTPUT)'" $(call COLOR,is already up to date!,green)
+MESSAGE_0.3	= $(PRINTLN) $(call COLOR,Executable,green) "'$(TARGET_OUTPUT)'" $(call COLOR,is already up to date!,green)
 # header messages
 MESSAGE_1.0	:= $(PRINTLN) $(call COLOR,Removing files..,blue)
 MESSAGE_1.1	:= $(PRINTLN) $(call COLOR,Removing directories..,blue)
@@ -264,9 +264,9 @@ MESSAGE_1.3	:= $(PRINTLN) $(call COLOR,Compilator..,blue)
 MESSAGE_1.4	:= $(PRINTLN) $(call COLOR,Warning!,magenta) Attempt to handle the exception by enabling the "'-Ofast'" optimizer flag..
 # body messages
 MESSAGE_2.0	:= echo Creating dir:
-MESSAGE_2.1	:= echo Compiling object file: $@
-MESSAGE_2.2	:= echo Assembling compiled objects into: $@
-MESSAGE_2.3	:= echo Running the executable: $(TARGET_OUTPUT)
+MESSAGE_2.1	= echo Compiling object file: $@
+MESSAGE_2.2	= echo Assembling compiled objects into: $@
+MESSAGE_2.3	= echo Running the executable: $(TARGET_OUTPUT)
 MESSAGE_2.4	:= echo Removing:
 # footer messages
 MESSAGE_3.0	:= echo Cleanup complete!
