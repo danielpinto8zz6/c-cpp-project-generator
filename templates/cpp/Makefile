@@ -27,7 +27,7 @@ USE_STRICT 			:= false
 
 
 # define the executable output name
-TARGET_NAME			:= librarySystem
+TARGET_NAME			:= software
 # custom flags:
 LFLAGS 				:=
 CCXFLAGS			:=
