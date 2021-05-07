@@ -83,7 +83,7 @@ ifeq ($(OPTIMIZER),true)
 	OPT := -Ofast
 else ifeq ($(OPTIMIZER),auto)
 	OPT := -Og
-else 
+else ifneq ($(OPTIMIZER),false)
 	OPT := $(OPTIMIZER)
 endif
 
