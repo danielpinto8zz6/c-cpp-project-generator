@@ -401,13 +401,13 @@ debug:
 # Help is intended to provide the user a minimum of guide-lines
 help:
 	@echo
-	@echo "make        - builds/updates everything, is ready to run with $(TARGET_OUTPUT) after completion"
-	@echo "make clean  - removes object file folder and executable"
-	@echo "make remake - remake consist of cleaning and compiling all"
-	@echo "make run    - builds/updates everything, runs immediately"
-	@$(PRINTLN) make run?.. - unlike \'run\', it allows passing arguments to the executable \
-		\(e.g: $(call COLOR,make,yellow) run?\'My Arguments\' OR $(call COLOR,make,yellow) run?MyArguments\)
-	@echo "make debug  - builds/updates everything displaying more detailed messages"
+	@$(PRINTLN) $(call COLOR,make,yellow) "       - builds/updates everything, is ready to run with $(TARGET_OUTPUT) after completion"
+	@$(PRINTLN) $(call COLOR,make,yellow) "clean  - removes object file folder and executable"
+	@$(PRINTLN) $(call COLOR,make,yellow) "remake - remake consist of cleaning and compiling all"
+	@$(PRINTLN) $(call COLOR,make,yellow) "run    - builds/updates everything, runs immediately"
+	@$(PRINTLN) $(call COLOR,make,yellow) run?.. - unlike \'run\', it allows passing arguments to the executable \
+		"("e.g: $(call COLOR,make,yellow) run?\'My Arguments\' OR $(call COLOR,make,yellow) run?MyArguments")"
+	@$(PRINTLN) $(call COLOR,make,yellow) "debug  - builds/updates everything displaying more detailed messages"
 	@echo
 
 # Non-File Targets
