@@ -21,7 +21,7 @@ COMPILER_SUPPORT		=	auto
 	(set to 'true' to get optimizer -Ofast, 'auto' to handle it automatically or any optimizer else, like -O0, -O1, -O2, -O3, ...)
 OPTIMIZER			=	auto
 # get general warnings (set to false to remove general warnings)
-GENERAL_WARNINGS   		:=	true
+GENERAL_WARNINGS    		:=	true
 # get larger amount of warnings (set to false to remove negligible warnings)
 USE_STRICT 			:=	false
 
@@ -33,7 +33,7 @@ TARGET_NAME			=	auto
 LFLAGS 				:=
 CCXFLAGS			:=
 # debug
-DEBUG				:= -g
+DEBUG				:=	-g
 
 # define library paths in addition to /usr/lib
 #   if I wanted to include libraries not in /usr/lib I'd specify
@@ -103,9 +103,9 @@ SRCEXT	:=	$(if $(SRCEXT0),$(SRCEXT0),$(firstword $(patsubst .%,%,$(filter .%,$(s
 # automatically generate target name by using the main file name
 TARGET_N0 :=	$(subst $s ,,$(if $(subst auto,,$(TARGET_NAME)),$(subst $s ,_,$(TARGET_NAME)),\
 							$(basename $(notdir $(shell egrep -E --include=\*.$(SRCEXT) -rnwl $(SRC_DIR) -e $(MAIN_MATCH))))))
-# final attempt to get the name						
-TARGET_N :=	$(subst $s ,,$(if $(TARGET_N0),$(TARGET_N0),\
-							$(basename $(notdir $(wildcard $(SRC_DIR)/*.$(SRCEXT))))))
+# final attempt to get the name				
+FILES_NAME	:=	$(basename $(notdir $(wildcard $(SRC_DIR)/*.$(SRCEXT))))
+TARGET_N :=	$(subst $s ,,$(if $(TARGET_N0),$(TARGET_N0),$(shell if [ $(words $(FILES_NAME)) = 1 ]; then echo $(FILES_NAME); fi)))
 
 # setting target name and extension
 TARGET		:=	$(if $(TARGET_N),$(TARGET_N),a)$(OS_EXE)
@@ -127,7 +127,7 @@ DEPS		:=	$(OBJECTS:.o=.d)
 # deleting dependencies appended to the file from 'make depend'
 
 # finds all your objects that corrispond to your .cpp files, system agnostic version
-OBJECTS 		:=	$(patsubst $(SRC_DIR)/%.$(SRCEXT),$(OBJ_DIR)/%.o, $(wildcard $(SRC_DIR)/*.$(SRCEXT)))
+OBJECTS 	:=	$(patsubst $(SRC_DIR)/%.$(SRCEXT),$(OBJ_DIR)/%.o, $(wildcard $(SRC_DIR)/*.$(SRCEXT)))
 # defining target directory
 TARGET_OUTPUT	:=	$(call FIXPATH,$(TARGET_DIR)/$(TARGET))
 
@@ -283,7 +283,7 @@ MESSAGE_0.0	:=	$(PRINTLN) $(call COLOR,Executing 'all' complete!,green)
 MESSAGE_0.1	:=	$(PRINTLN) $(call COLOR,Executing 'all' complete by using '-Ofast' optimizer flag!,yellow)
 MESSAGE_0.2	:=	$(PRINTLN) $(call COLOR,Exceptions handler failed!,red)
 MESSAGE_0.3	=	$(PRINTLN) $(call COLOR,Executable,green) "'$(TARGET_OUTPUT)'" $(call COLOR,is already up to date!,green)
-MESSAGE_0.4	:=	$(PRINTLN) $(call COLOR,Language detection failed! Pleas, fill manually the Makefile 'SRC_EXT' variable,red)
+MESSAGE_0.4	:=	$(PRINTLN) $(call COLOR,Language detection failed! Please  fill manually the Makefile 'SRC_EXT' variable,red)
 # header messages
 MESSAGE_1.0	:=	$(PRINTLN) $(call COLOR,Removing files..,blue)
 MESSAGE_1.1	:=	$(PRINTLN) $(call COLOR,Removing directories..,blue)
