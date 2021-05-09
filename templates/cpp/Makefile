@@ -10,19 +10,20 @@
 #------------------------ YOU CAN EDIT BELOW THIS LINE ---------------------------
 #---------------------------------------------------------------------------------
 
-# sources extension (project language)
-SRCEXT				:= cpp
+# sources extension corrisponds to the "project language"\
+	(if set to auto it will try to fetch it itslef. Alternatively enter it manually: cpp, c, ...)
+SRC_EXT				:=	auto
 # define the compiler to use (e.g: gcc, c++, ...)
-CCX					= auto
+CCX					=	auto
 # define the compiler support version (e.g: 98, 99, 11, 14, 17, 2a, ...)
-COMPILER_SUPPORT	= auto
+COMPILER_SUPPORT	=	auto
 # to compile and optimize code \
-(set to 'true' to get optimizer -Ofast, 'auto' to handle it automatically or any optimizer else, like -O0, -O1, -O2, -O3, ...)
-OPTIMIZER			= auto
+	(set to 'true' to get optimizer -Ofast, 'auto' to handle it automatically or any optimizer else, like -O0, -O1, -O2, -O3, ...)
+OPTIMIZER			=	auto
 # get general warnings (set to false to remove general warnings)
-GENERAL_WARNINGS    := true
+GENERAL_WARNINGS    :=	true
 # get larger amount of warnings (set to false to remove negligible warnings)
-USE_STRICT 			:= false
+USE_STRICT 			:=	false
 
 
 
@@ -62,8 +63,79 @@ DISP_INFO			= false
 #---------------------------------------------------------------------------------
 
 #############################
+####### DIRECTORIES #########
+#############################
+
+
+# main finder regex
+MAIN_MATCH	:= "^(\s)*(unsigned\s+)?(void|bool|short|int|long|long\s+long|double|char)\s+main\s*\((\s|\S)*\)\s*\{?"
+
+# project language detector ('$s ' stands for literal space)
+SRCEXT0	=	$(if $(subst auto,,$(SRC_EXT)),$(subst $s ,,$(SRC_EXT)),$(firstword $(patsubst .%,%,$(filter .%,$(suffix\
+					$(filter %.cpp %.c,$(shell egrep -E --include=\*.* -rnwl $(SRC_DIR) -e $(MAIN_MATCH))))))))
+# final attempt to get the extension
+SRCEXT	=	$(if $(SRCEXT0),$(SRCEXT0),$(firstword $(patsubst .%,%,$(filter .%,$(suffix\
+					$(filter %.cpp %.c,$(wildcard $(SRC_DIR)/*.*)))))))
+
+# automatically generate target name by using the main file name
+TARGET_N0 =	$(subst $s ,,$(if $(subst auto,,$(TARGET_NAME)),$(subst $s ,_,$(TARGET_NAME)),\
+							$(basename $(notdir $(shell egrep -E --include=\*.$(SRCEXT) -rnwl $(SRC_DIR) -e $(MAIN_MATCH))))))
+# final attempt to get the name						
+TARGET_N =	$(subst $s ,,$(if $(TARGET_N0),$(TARGET_N0),\
+							$(basename $(notdir $(wildcard $(SRC_DIR)/*.$(SRCEXT))))))
+
+# defining directories
+ifeq ($(OS),Windows_NT)
+	SRC_DIR		=	$(SRC_DIR_NAME)
+	TARGET		:=	$(if $(TARGET_N),$(TARGET_N),a).exe
+	TARGET_DIR	:=	$(TARGET_DIR_NAME)
+	OBJ_DIR		:=	$(OBJECT_DIR_NAME)
+	INCL_DIRS	:=	$(INCLUDE_DIR_NAME)
+	LIB_DIRS	:=	$(LIB_DIR_NAME)
+	FIXPATH 	=	$(subst /,\,$1)
+	RM			=	del /q /f
+	MD			:=	mkdir
+else
+	SRC_DIR		=	$(shell find $(SRC_DIR_NAME) -type d)
+	TARGET		:=	$(if $(TARGET_N),$(TARGET_N),a)
+	TARGET_DIR	:=	$(shell find $(TARGET_DIR_NAME) -type d)
+	OBJ_DIR		:=	$(shell find $(OBJECT_DIR_NAME) -type d)
+	INCL_DIRS	:=	$(shell find $(INCLUDE_DIR_NAME) -type d)
+	LIB_DIRS	:=	$(shell find $(LIB_DIR_NAME) -type d)
+	FIXPATH 	=	$1
+	RM 			=	rm -f
+	MD			:=	mkdir -p
+endif
+
+# define any directories containing header files other than /usr/include
+INCLUDES	= $(patsubst %,-I%, $(INCL_DIRS:%/=%))
+# define the C libs
+LIBS		= $(patsubst %,-L%, $(LIB_DIRS:%/=%))
+# define the C source files
+SOURCES		= $(wildcard $(patsubst %,%/*.$(SRCEXT), $(SRC_DIR)))
+# define the C object files
+OBJECTS		= $(SOURCES:.$(SRCEXT)=.o)
+# define the dependency output files
+DEPS		= $(OBJECTS:.o=.d)
+
+#
+# The following part of the makefile is generic; it can be used to 
+# build any executable just by changing the definitions above and by
+# deleting dependencies appended to the file from 'make depend'
+
+# finds all your objects that corrispond to your .cpp files, system agnostic version
+OBJECTS 		:=	$(patsubst $(SRC_DIR)/%.$(SRCEXT),$(OBJ_DIR)/%.o, $(wildcard $(SRC_DIR)/*.$(SRCEXT)))
+# defining target directory
+TARGET_OUTPUT	=	$(call FIXPATH,$(TARGET_DIR)/$(TARGET))
+
+
+
+
+
+#############################
 ##### COMPILER SETTINGS #####
 #############################
+
 
 STD = $(subst p,+,$(SRCEXT))
 
@@ -75,6 +147,9 @@ ifeq  ($(subst auto,,$(CCX)),)
 	else ifeq ($(SRCEXT),cpp)
 		CCX := g++
 		STD := c++
+	else
+		CCX :=
+		STD :=
 	endif
 endif
 
@@ -93,6 +168,8 @@ ifeq ($(subst auto,,$(COMPILER_SUPPORT)),)
 		COMPILER_SUPPORT := 99
 	else ifeq ($(STD),c++)
 		COMPILER_SUPPORT := 17
+	else
+		COMPILER_SUPPORT :=
 	endif
 endif
 
@@ -167,67 +244,6 @@ CXXFLAGS	= -std=$(STD)$(COMPILER_SUPPORT) $(OPT) -Wall $(CCXFLAGS) $(CWARNS) $(D
 
 
 #############################
-####### DIRECTORIES #########
-#############################
-
-
-# automatically generate target name copying it from main file name
-ifeq ($(subst auto,,$(TARGET_NAME)),)
-	MAIN_MATCH	:= "^(\s)*(unsigned\s+)?(void|bool|short|int|long|long\s+long|double|char)\s+main\s*\((\s|\S)*\)\s*\{?"
-	MAIN_PATH	= $(shell egrep -E --include=\*.$(SRCEXT) -rnl $(SRC_DIR) -e $(MAIN_MATCH))
-	MAIN_NAME	= $(basename $(notdir $(MAIN_PATH)))
-	TARGET_NAME	= $(if $(MAIN_NAME),$(MAIN_NAME),a)
-endif
-
-# defining directories
-ifeq ($(OS),Windows_NT)
-	TARGET		:= $(TARGET_NAME).exe
-	SRC_DIR		:= $(SRC_DIR_NAME)
-	TARGET_DIR	:= $(TARGET_DIR_NAME)
-	OBJ_DIR		:= $(OBJECT_DIR_NAME)
-	INCL_DIRS	:= $(INCLUDE_DIR_NAME)
-	LIB_DIRS	:= $(LIB_DIR_NAME)
-	FIXPATH 	= $1$(subst /,\,$1)
-	RM			= del /q /f
-	MD			:= mkdir
-else
-	TARGET		:= $(TARGET_NAME)
-	SRC_DIR		:= $(shell find $(SRC_DIR_NAME) -type d)
-	TARGET_DIR	:= $(shell find $(TARGET_DIR_NAME) -type d)
-	OBJ_DIR		:= $(shell find $(OBJECT_DIR_NAME) -type d)
-	INCL_DIRS	:= $(shell find $(INCLUDE_DIR_NAME) -type d)
-	LIB_DIRS	:= $(shell find $(LIB_DIR_NAME) -type d)
-	FIXPATH 	= $1
-	RM 			= rm -f
-	MD			:= mkdir -p
-endif
-
-# define any directories containing header files other than /usr/include
-INCLUDES	= $(patsubst %,-I%, $(INCL_DIRS:%/=%))
-# define the C libs
-LIBS		= $(patsubst %,-L%, $(LIB_DIRS:%/=%))
-# define the C source files
-SOURCES		= $(wildcard $(patsubst %,%/*.$(SRCEXT), $(SRC_DIR)))
-# define the C object files
-OBJECTS		= $(SOURCES:.$(SRCEXT)=.o)
-# define the dependency output files
-DEPS		= $(OBJECTS:.o=.d)
-
-#
-# The following part of the makefile is generic; it can be used to 
-# build any executable just by changing the definitions above and by
-# deleting dependencies appended to the file from 'make depend'
-
-# finds all your objects that corrispond to your .cpp files, system agnostic version
-OBJECTS 		:= $(patsubst $(SRC_DIR)/%.$(SRCEXT), $(OBJ_DIR)/%.o, $(wildcard $(SRC_DIR)/*.$(SRCEXT)))
-# defining target directory
-TARGET_OUTPUT	=	$(call FIXPATH,$(TARGET_DIR)/$(TARGET))
-
-
-
-
-
-#############################
 ########## UTILITY ##########
 #############################
 
@@ -255,32 +271,33 @@ RECIPE_DEBUG = $(if $(AT),,echo $1) $1
 
 
 # display complete info
-AT			= $(if $(filter true,$(DISP_INFO)),,@)
--S			= $(if $(filter true,$(DISP_INFO)),--no-silent,-s)
--W			= $(if $(filter true,$(DISP_INFO)),--print-directory,--no-print-directory)
+AT			=	$(if $(filter true,$(DISP_INFO)),,@)
+-S			=	$(if $(filter true,$(DISP_INFO)),--no-silent,-s)
+-W			=	$(if $(filter true,$(DISP_INFO)),--print-directory,--no-print-directory)
 
 # outcome messages
-MESSAGE_0.0	:= $(PRINTLN) $(call COLOR,Executing 'all' complete!,green)
-MESSAGE_0.1	:= $(PRINTLN) $(call COLOR,Executing 'all' complete by using '-Ofast' optimizer flag!,yellow)
-MESSAGE_0.2	:= $(PRINTLN) $(call COLOR,Exceptions handler failed!,red)
-MESSAGE_0.3	= $(PRINTLN) $(call COLOR,Executable,green) "'$(TARGET_OUTPUT)'" $(call COLOR,is already up to date!,green)
+MESSAGE_0.0	:=	$(PRINTLN) $(call COLOR,Executing 'all' complete!,green)
+MESSAGE_0.1	:=	$(PRINTLN) $(call COLOR,Executing 'all' complete by using '-Ofast' optimizer flag!,yellow)
+MESSAGE_0.2	:=	$(PRINTLN) $(call COLOR,Exceptions handler failed!,red)
+MESSAGE_0.3	=	$(PRINTLN) $(call COLOR,Executable,green) "'$(TARGET_OUTPUT)'" $(call COLOR,is already up to date!,green)
+MESSAGE_0.4	:=	$(PRINTLN) $(call COLOR,Language detection failed! Pleas, fill manually the Makefile 'SRC_EXT' variable,red)
 # header messages
-MESSAGE_1.0	:= $(PRINTLN) $(call COLOR,Removing files..,blue)
-MESSAGE_1.1	:= $(PRINTLN) $(call COLOR,Removing directories..,blue)
-MESSAGE_1.2	:= $(PRINTLN) $(call COLOR,Making directories..,blue)
-MESSAGE_1.3	:= $(PRINTLN) $(call COLOR,Compilator..,blue)
-MESSAGE_1.4	:= $(PRINTLN) $(call COLOR,Warning!,magenta) Attempt to handle the exception by enabling the "'-Ofast'" optimizer flag..
+MESSAGE_1.0	:=	$(PRINTLN) $(call COLOR,Removing files..,blue)
+MESSAGE_1.1	:=	$(PRINTLN) $(call COLOR,Removing directories..,blue)
+MESSAGE_1.2	:=	$(PRINTLN) $(call COLOR,Making directories..,blue)
+MESSAGE_1.3	:=	$(PRINTLN) $(call COLOR,Compilator..,blue)
+MESSAGE_1.4	:=	$(PRINTLN) $(call COLOR,Warning!,magenta) Attempt to handle the exception by enabling the "'-Ofast'" optimizer flag..
 # body messages
-MESSAGE_2.0	:= echo Creating dir:
-MESSAGE_2.1	= echo Compiling object file: $@
-MESSAGE_2.2	= echo Assembling compiled objects into: $@
-MESSAGE_2.3	= echo Running the executable: $(TARGET_OUTPUT)
-MESSAGE_2.4	:= echo Removing:
+MESSAGE_2.0	:=	echo Creating dir:
+MESSAGE_2.1	=	echo Compiling object file: $@
+MESSAGE_2.2	=	echo Assembling compiled objects into: $@
+MESSAGE_2.3	=	echo Running the executable: $(TARGET_OUTPUT)
+MESSAGE_2.4	:=	echo Removing:
 # footer messages
-MESSAGE_3.0	:= echo Cleanup complete!
-MESSAGE_3.1	:= echo Nothing to be deleted!
-MESSAGE_3.2	:= echo Remake complete!
-MESSAGE_3.3	:= echo Executing 'run: all' complete!
+MESSAGE_3.0	:=	echo Cleanup complete!
+MESSAGE_3.1	:=	echo Nothing to be deleted!
+MESSAGE_3.2	:=	echo Remake complete!
+MESSAGE_3.3	:=	echo Executing 'run: all' complete!
 
 
 
@@ -294,11 +311,14 @@ MESSAGE_3.3	:= echo Executing 'run: all' complete!
 # makes build directory, updates your objects, builds your executable
 all: --directories
 	@echo;
-	@if $(MAKE) $(-W) -q $(TARGET_OUTPUT); then \
-		$(MESSAGE_0.3); \
-	elif $(MESSAGE_1.3) && $(MAKE) $(-W) $(TARGET_OUTPUT); then \
-		echo; $(MESSAGE_0.0); \
-	else $(MAKE) $(-S) exp_handler; \
+	@if [ $(SRCEXT) ]; then \
+		if $(MAKE) $(-W) -q $(TARGET_OUTPUT); then \
+			$(MESSAGE_0.3); \
+		elif $(MESSAGE_1.3) && $(MAKE) $(-W) $(TARGET_OUTPUT); then \
+			echo; $(MESSAGE_0.0); \
+		else $(MAKE) $(-S) exp_handler; \
+		fi \
+	else $(MESSAGE_0.4); \
 	fi
 
 # updates your objects, builds your executable
