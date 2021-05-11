@@ -14,14 +14,14 @@
 	(if set to auto it will try to fetch it itslef. Alternatively enter it manually: cpp, c, ...)
 SRC_EXT				:=	auto
 # define the compiler to use (e.g: gcc, c++, ...)
-CCX				=	auto
+CCX					=	auto
 # define the compiler support version (e.g: 98, 99, 11, 14, 17, 2a, ...)
-COMPILER_SUPPORT		=	auto
-# to compile and optimize code \
-	(set to 'true' to get optimizer -Ofast, 'auto' to handle it automatically or any optimizer else, like -O0, -O1, -O2, -O3, ...)
+COMPILER_SUPPORT	=	auto
+# to compile and optimize code (if set to false, the exceptions handler will not start, set to 'true' to get optimizer -Ofast,\
+	'auto' to handle it automatically or any optimizer else, like -O0, -O1, -O2, -O3, ...)
 OPTIMIZER			=	auto
 # get general warnings (set to false to remove general warnings)
-GENERAL_WARNINGS    		:=	true
+GENERAL_WARNINGS    :=	true
 # get larger amount of warnings (set to false to remove negligible warnings)
 USE_STRICT 			:=	false
 
@@ -40,19 +40,19 @@ DEBUG				:=	-g
 #   their path using -Lpath, something like:
 
 # define output directory
-TARGET_DIR_NAME		:=	build
+TARGET_DIR		:=	build
 # define output directory
-OBJECT_DIR_NAME		:=	bin
+OBJECT_DIR		:=	bin
 # define source directory 
-SRC_DIR_NAME		:=	src
+SRC_DIR			:=	src
 # define include directory
-INCLUDE_DIR_NAME	:=	include
+INCLUDE_DIR		:=	include
 # define lib directory
-LIB_DIR_NAME		:=	lib
+LIB_DIR			:=	lib
 
 
 # display complete info (this is automatically set to true when "make debug" is called)
-DISP_INFO		=	false
+DISP_INFO			=	false
 
 
 
@@ -70,25 +70,21 @@ DISP_INFO		=	false
 # defining directories
 ifeq ($(OS),Windows_NT)
 	OS_EXE		:=	.exe
-	SRC_DIR		:=	$(SRC_DIR_NAME)
-	TARGET_DIR	:=	$(TARGET_DIR_NAME)
-	OBJ_DIR		:=	$(OBJECT_DIR_NAME)
-	INCL_DIRS	:=	$(INCLUDE_DIR_NAME)
-	LIB_DIRS	:=	$(LIB_DIR_NAME)
 	FIXPATH 	=	$(subst /,\,$1)
 	RM			:=	del /q /f
 	MD			:=	mkdir
+	ESC_SEQ		:=	-e
 else
-	OS_EXE		:=
-	SRC_DIR		:=	$(shell find $(SRC_DIR_NAME) -type d)
-	TARGET_DIR	:=	$(shell find $(TARGET_DIR_NAME) -type d)
-	OBJ_DIR		:=	$(shell find $(OBJECT_DIR_NAME) -type d)
-	INCL_DIRS	:=	$(shell find $(INCLUDE_DIR_NAME) -type d)
-	LIB_DIRS	:=	$(shell find $(LIB_DIR_NAME) -type d)
+	SRC_DIR		:=	$(shell find $(SRC_DIR) -type d)
+	INCL_DIRS	:=	$(shell find $(INCLUDE_DIR) -type d)
+	LIB_DIRS	:=	$(shell find $(LIB_DIR) -type d)
 	FIXPATH 	=	$1
 	RM 			:=	rm -f
 	MD			:=	mkdir -p
 endif
+RM 			:= rm -f
+FIXPATH 	= $1
+
 
 # main finder regex
 MAIN_MATCH	:= "^(\s)*(unsigned\s+)?(void|bool|short|int|long|long\s+long|double|char)\s+main\s*\((\s|\S)*\)\s*\{?"
@@ -127,7 +123,7 @@ DEPS		:=	$(OBJECTS:.o=.d)
 # deleting dependencies appended to the file from 'make depend'
 
 # finds all your objects that corrispond to your .cpp files, system agnostic version
-OBJECTS 	:=	$(patsubst $(SRC_DIR)/%.$(SRCEXT),$(OBJ_DIR)/%.o, $(wildcard $(SRC_DIR)/*.$(SRCEXT)))
+OBJECTS 		:=	$(patsubst $(SRC_DIR)/%.$(SRCEXT),$(OBJECT_DIR)/%.o, $(wildcard $(SRC_DIR)/*.$(SRCEXT)))
 # defining target directory
 TARGET_OUTPUT	:=	$(call FIXPATH,$(TARGET_DIR)/$(TARGET))
 
@@ -259,7 +255,7 @@ COLOR = $(if $(filter red,$2),"\e[1;31m$(subst ",,$1)\e[0m",\
 						$(if $(filter magenta,$2),"\e[1;35m$(subst ",,$1)\e[0m",\
 							$(if $(filter cyan,$2),"\e[1;36m$(subst ",,$1)\e[0m",$1))))))
 # enable echo output styling
-PRINTLN := echo -e
+PRINTLN := echo $(ESC_SEQ)
 
 # recipe debug
 RECIPE_DEBUG = $(if $(AT),,echo $1) $1
@@ -277,11 +273,12 @@ RECIPE_DEBUG = $(if $(AT),,echo $1) $1
 AT			=	$(if $(filter true,$(DISP_INFO)),,@)
 -S			=	$(if $(filter true,$(DISP_INFO)),--no-silent,-s)
 -W			=	$(if $(filter true,$(DISP_INFO)),--print-directory,--no-print-directory)
+EXIT1		=	$(if $(filter true,$(DISP_INFO)),exit 1,exit 1 &> /dev/null)
 
 # outcome messages
 MESSAGE_0.0	:=	$(PRINTLN) $(call COLOR,Executing 'all' complete!,green)
 MESSAGE_0.1	:=	$(PRINTLN) $(call COLOR,Executing 'all' complete by using '-Ofast' optimizer flag!,yellow)
-MESSAGE_0.2	:=	$(PRINTLN) $(call COLOR,Exceptions handler failed!,red)
+MESSAGE_0.2	:=	$(PRINTLN) $(call COLOR,Executing 'all' failed!,red)
 MESSAGE_0.3	=	$(PRINTLN) $(call COLOR,Executable,green) "'$(TARGET_OUTPUT)'" $(call COLOR,is already up to date!,green)
 MESSAGE_0.4	:=	$(PRINTLN) $(call COLOR,Language detection failed! Please  fill manually the Makefile 'SRC_EXT' variable,red)
 # header messages
@@ -301,6 +298,7 @@ MESSAGE_3.0	:=	echo Cleanup complete!
 MESSAGE_3.1	:=	echo Nothing to be deleted!
 MESSAGE_3.2	:=	echo Remake complete!
 MESSAGE_3.3	:=	echo Executing 'run: all' complete!
+MESSAGE_3.4	:=	echo Exceptions handler failed!
 
 
 
@@ -319,7 +317,8 @@ all: --directories
 			$(MESSAGE_0.3); \
 		elif $(MESSAGE_1.3) && $(MAKE) $(-W) $(TARGET_OUTPUT); then \
 			echo; $(MESSAGE_0.0); \
-		else $(MAKE) $(-S) exp_handler; \
+		elif ! $(MAKE) $(-S) exp_handler; then \
+			$(if $(filter auto,$(OPTIMIZER)),echo; $(MESSAGE_0.2);,) $(EXIT1); \
 		fi \
 	else $(MESSAGE_0.4); \
 	fi
@@ -343,7 +342,7 @@ $(TARGET_OUTPUT): $(OBJECTS)
 
 # builds your objects
 # -MMD generates dependency output files same name as the .o file
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.$(SRCEXT)
+$(OBJECT_DIR)/%.o: $(SRC_DIR)/%.$(SRCEXT)
 	$(if $(AT),@,@echo;) $(MESSAGE_2.1)
 	$(AT) $(CCX) $(CXXFLAGS) -c -MMD $< -o $@ $(LFLAGS) $(LIBS) $(INCLUDES) 
 
@@ -362,18 +361,18 @@ exp_handler:
 		echo; $(MESSAGE_1.4); echo; \
 		if $(MAKE) OPTIMIZER=true; then \
 			$(MESSAGE_0.1); echo; \
-		else echo; $(MESSAGE_0.2); echo; exit 1; \
+		else echo; $(MESSAGE_3.4); $(EXIT1); \
 		fi \
-	else (exit 1); \
+	else $(EXIT1); \
 	fi
 
 # Make the Directories
 --directories:
-	@if [ ! -d $(OBJ_DIR) ] || [ ! -d $(TARGET_DIR) ]; then echo; $(MESSAGE_1.2); fi
-	@if [ ! -d $(OBJ_DIR) ]; then \
+	@if [ ! -d $(OBJECT_DIR) ] || [ ! -d $(TARGET_DIR) ]; then echo; $(MESSAGE_1.2); fi
+	@if [ ! -d $(OBJECT_DIR) ]; then \
 		$(if $(AT),,echo;) \
-		$(MESSAGE_2.0) $(OBJ_DIR); \
-		$(call RECIPE_DEBUG, $(MD) $(OBJ_DIR);) \
+		$(MESSAGE_2.0) $(OBJECT_DIR); \
+		$(call RECIPE_DEBUG, $(MD) $(OBJECT_DIR);) \
 	fi
 	@if [ ! -d $(TARGET_DIR) ]; then \
 		$(if $(AT),,echo;) \
@@ -384,7 +383,7 @@ exp_handler:
 # Clean removes all the object and executable files
 clean:
 	@echo; 
-	@if [ -d $(OBJ_DIR) ] || [ -d $(TARGET_DIR) ]; then \
+	@if [ -d $(OBJECT_DIR) ] || [ -d $(TARGET_DIR) ]; then \
 		$(MESSAGE_1.0); \
 		$(MESSAGE_2.4) $(TARGET_OUTPUT); \
 		$(call RECIPE_DEBUG, $(RM) $(TARGET_OUTPUT);) \
@@ -393,8 +392,8 @@ clean:
 		$(MESSAGE_2.4) $(call FIXPATH,$(DEPS)); \
 		$(call RECIPE_DEBUG, $(RM) $(call FIXPATH,$(DEPS));) \
 		echo; $(MESSAGE_1.1); \
-		$(MESSAGE_2.4) $(OBJ_DIR) $(TARGET_DIR); \
-		$(call RECIPE_DEBUG, $(RM) -rf $(OBJ_DIR) $(TARGET_DIR);) \
+		$(MESSAGE_2.4) $(OBJECT_DIR) $(TARGET_DIR); \
+		$(call RECIPE_DEBUG, $(RM) -rf $(OBJECT_DIR) $(TARGET_DIR);) \
 		echo; $(MESSAGE_3.0); \
 	else $(MESSAGE_3.1); \
 	fi
