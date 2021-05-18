@@ -12,28 +12,28 @@
 
 # sources extension corrisponds to the "project language"\
 	(if set to auto it will try to fetch it itslef. Alternatively enter it manually: cpp, c, ...)
-SRC_EXT				:=	auto
+SRC_EXT			:=	auto
 # define the compiler to use (e.g: gcc, c++, ...)
-CCX					=	auto
+CCX			=	auto
 # define the compiler support version (e.g: 98, 99, 11, 14, 17, 2a, ...)
 COMPILER_SUPPORT	=	auto
 # to compile and optimize code (if set to false, the exceptions handler will not start, set to 'true' to get optimizer -Ofast,\
 	'auto' to handle it automatically or any optimizer else like: -O0, -O1, -O2, -O3, ...)
-OPTIMIZER			=	auto
+OPTIMIZER		=	auto
 # get general warnings (set to false to remove general warnings)
-GENERAL_WARNINGS    :=	true
+GENERAL_WARNINGS	:=	true
 # get larger amount of warnings (set to false to remove negligible warnings)
-USE_STRICT 			:=	false
+USE_STRICT 		:=	false
 
 
 
 # define the executable output name (if set to auto it will automatically be assigned the main file name)
-TARGET_NAME			=	auto
+TARGET_NAME		=	auto
 # custom flags:
-LFLAGS 				:=
-CCXFLAGS			:=
+LFLAGS			:=
+CCXFLAGS		:=
 # debug
-DEBUG				:=	-g
+DEBUG			:=	-g
 
 # define library paths in addition to /usr/lib
 #   if I wanted to include libraries not in /usr/lib I'd specify
@@ -52,7 +52,7 @@ LIB_DIR			:=	lib
 
 
 # display complete info (this is automatically set to true when "make debug" is called)
-DISP_INFO			=	false
+DISP_INFO		=	false
 
 
 
@@ -70,19 +70,20 @@ DISP_INFO			=	false
 # defining directories
 ifeq ($(OS),Windows_NT)
 	OS_EXE		:=	.exe
+	INCL_DIRS	:=	$(INCLUDE_DIR)
+	LIB_DIRS	:=	$(LIB_DIR)
 	FIXPATH 	=	$(subst /,\,$1)
-	RM			:=	del /q /f
-	MD			:=	mkdir
+	RM		:=	del /q /f
+	MD		:=	mkdir
 	ESC_SEQ		:=	-e
 else
 	SRC_DIR		:=	$(shell find $(SRC_DIR) -type d)
 	INCL_DIRS	:=	$(shell find $(INCLUDE_DIR) -type d)
 	LIB_DIRS	:=	$(shell find $(LIB_DIR) -type d)
 	FIXPATH 	=	$1
-	RM 			:=	rm -f
-	MD			:=	mkdir -p
+	RM 		:=	rm -f
+	MD		:=	mkdir -p
 endif
-
 
 # main finder regex
 MAIN_MATCH	:= "^(\s)*(unsigned\s+)?(void|bool|short|int|long|long\s+long|double|char)\s+main\s*\((\s|\S)*\)\s*\{?"
@@ -110,20 +111,17 @@ INCLUDES	:=	$(patsubst %,-I%, $(INCL_DIRS:%/=%))
 LIBS		:=	$(patsubst %,-L%, $(LIB_DIRS:%/=%))
 # define the C source files
 SOURCES		:=	$(wildcard $(patsubst %,%/*.$(SRCEXT), $(SRC_DIR)))
-# define the C object files
-OBJECTS		:=	$(SOURCES:.$(SRCEXT)=.o)
+
+# finds objects that corrispond to the src files, system agnostic version
+OBJECTS 		:=	$(patsubst $(SRC_DIR)/%.$(SRCEXT),$(OBJECT_DIR)/%.o, $(SOURCES))
 # define the dependency output files
 DEPS		:=	$(OBJECTS:.o=.d)
-
+# defining target directory
+TARGET_OUTPUT	:=	$(call FIXPATH,$(TARGET_DIR)/$(TARGET))
 #
 # The following part of the makefile is generic; it can be used to 
 # build any executable just by changing the definitions above and by
 # deleting dependencies appended to the file from 'make depend'
-
-# finds all your objects that corrispond to your .cpp files, system agnostic version
-OBJECTS 		:=	$(patsubst $(SRC_DIR)/%.$(SRCEXT),$(OBJECT_DIR)/%.o, $(wildcard $(SRC_DIR)/*.$(SRCEXT)))
-# defining target directory
-TARGET_OUTPUT	:=	$(call FIXPATH,$(TARGET_DIR)/$(TARGET))
 
 
 
@@ -247,11 +245,11 @@ CXXFLAGS	:= -std=$(STD)$(COMPILER_SUPPORT) $(OPT) -Wall $(CCXFLAGS) $(CWARNS) $(
 
 # chose text style
 COLOR = $(if $(filter red,$2),"\e[1;31m$(subst ",,$1)\e[0m",\
-			$(if $(filter green,$2),"\e[1;32m$(subst ",,$1)\e[0m",\
-				$(if $(filter yellow,$2),"\e[1;33m$(subst ",,$1)\e[0m",\
-					$(if $(filter blue,$2),"\e[1;34m$(subst ",,$1)\e[0m",\
-						$(if $(filter magenta,$2),"\e[1;35m$(subst ",,$1)\e[0m",\
-							$(if $(filter cyan,$2),"\e[1;36m$(subst ",,$1)\e[0m",$1))))))
+		$(if $(filter green,$2),"\e[1;32m$(subst ",,$1)\e[0m",\
+			$(if $(filter yellow,$2),"\e[1;33m$(subst ",,$1)\e[0m",\
+				$(if $(filter blue,$2),"\e[1;34m$(subst ",,$1)\e[0m",\
+					$(if $(filter magenta,$2),"\e[1;35m$(subst ",,$1)\e[0m",\
+						$(if $(filter cyan,$2),"\e[1;36m$(subst ",,$1)\e[0m",$1))))))
 # enable echo output styling
 PRINTLN := echo $(ESC_SEQ)
 
@@ -268,9 +266,9 @@ RECIPE_DEBUG = $(if $(AT),,echo $1) $1
 
 
 # display complete info
-AT			=	$(if $(filter true,$(DISP_INFO)),,@)
--S			=	$(if $(filter true,$(DISP_INFO)),--no-silent,-s)
--W			=	$(if $(filter true,$(DISP_INFO)),--print-directory,--no-print-directory)
+AT		=	$(if $(filter true,$(DISP_INFO)),,@)
+-S		=	$(if $(filter true,$(DISP_INFO)),--no-silent,-s)
+-W		=	$(if $(filter true,$(DISP_INFO)),--print-directory,--no-print-directory)
 EXIT1		=	$(if $(filter true,$(DISP_INFO)),exit 1,exit 1 &> /dev/null)
 
 # outcome messages
@@ -316,7 +314,7 @@ all: --directories
 		elif $(MESSAGE_1.3) && $(MAKE) $(-W) $(TARGET_OUTPUT); then \
 			echo; $(MESSAGE_0.0); \
 		elif ! $(MAKE) $(-S) exp_handler; then \
-			$(if $(filter auto,$(OPTIMIZER)),echo; $(MESSAGE_0.2);,) $(EXIT1); \
+			$(if $(filter-out true,$(OPTIMIZER)),echo; $(MESSAGE_0.2);,) $(EXIT1); \
 		fi \
 	else $(MESSAGE_0.4); \
 	fi
@@ -342,7 +340,8 @@ $(TARGET_OUTPUT): $(OBJECTS)
 # -MMD generates dependency output files same name as the .o file
 $(OBJECT_DIR)/%.o: $(SRC_DIR)/%.$(SRCEXT)
 	$(if $(AT),@,@echo;) $(MESSAGE_2.1)
-	$(AT) $(CCX) $(CXXFLAGS) -c -MMD $< -o $@ $(LFLAGS) $(LIBS) $(INCLUDES) 
+	$(AT) $(CCX) $(CXXFLAGS) -c -MMD $< -o $@ $(LFLAGS) $(LIBS) $(INCLUDES)
+
 
 
 
