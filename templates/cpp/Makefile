@@ -318,6 +318,7 @@ MESSAGE_3.4	:=	echo Exceptions handler failed!
 
 # makes build directory, updates your objects, builds your executable
 all: --directories
+	@echo;
 	@if [ $(SRCEXT) ]; then \
 		if $(MAKE) $(-W) -q $(TARGET_OUTPUT); then \
 			$(MESSAGE_0.3); \
