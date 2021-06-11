@@ -98,7 +98,7 @@ ifeq ($(OS),Windows_NT)
 		BR		:=	&
 		NL		:=	type nul | more /e /p
 		EXITSTATUS	:=	%errorlevel%
-		MAIN_MATCH	:=	"^[ ]*[unsigned ]*[void bool char short int long long long double ][ ]*main[ ]*(.*)[ ]*{*"
+		MAIN_MATCH	:=	"^[ ]*[unsigned ]*[void bool char short int long long long double ][ ][ ]*main[ ]*(.*)[ ]*{*"
 		SRCEXT_FIND	=	findstr /s /i /m /r /c:$(MAIN_MATCH) $(SRC_DIR)/*.$(if $(SRCEXT),$(SRCEXT),*)
 		EXIT1		=	$(if $(filter true,$(DISP_INFO)),exit 1,exit 1 >nul 2>&1)
 		FIXPATH		=	$(subst /,$\,$1)
@@ -107,9 +107,9 @@ else
 	SRC_DIR		:=	$(shell find $(SRC_DIR) -type d)
 	INCL_DIRS	:=	$(shell find $(INCLUDE_DIR) -type d)
 	LIB_DIRS	:=	$(shell find $(LIB_DIR) -type d)
-	RM 			:=	rm -f
+	RM 		:=	rm -f
 	RMDIR		:=	$(RM)r
-	MD			:=	mkdir -p
+	MD		:=	mkdir -p
 	E_START		:=	"\e
 	E_END		:=	\e[0m"
 	BR		:=	;
@@ -279,12 +279,12 @@ CXXFLAGS	:= -std=$(STD)$(COMPILER_SUPPORT) $(OPT) -Wall $(CCXFLAGS) $(CWARNS) $(
 
 
 # chose text style
-COLOR = $(if $(filter red,$2),$(E_START)[1;31m$(subst ",,$1)$(E_END)\
-			,$(if $(filter green,$2),$(E_START)[1;32m$(subst ",,$1)$(E_END)\
-				,$(if $(filter yellow,$2),$(E_START)[1;33m$(subst ",,$1)$(E_END)\
-					,$(if $(filter blue,$2),$(E_START)[1;34m$(subst ",,$1)$(E_END)\
-						,$(if $(filter magenta,$2),$(E_START)[1;35m$(subst ",,$1)$(E_END)\
-							,$(if $(filter cyan,$2),$(E_START)[1;36m$(subst ",,$1)$(E_END),$1))))))
+COLOR = $(if $(filter red,$2),$(E_START)[1;31m$(subst ",,$1)$(E_END),$(if \
+			$(filter green,$2),$(E_START)[1;32m$(subst ",,$1)$(E_END),$(if \
+				$(filter yellow,$2),$(E_START)[1;33m$(subst ",,$1)$(E_END),$(if \
+					$(filter blue,$2),$(E_START)[1;34m$(subst ",,$1)$(E_END),$(if \
+						$(filter magenta,$2),$(E_START)[1;35m$(subst ",,$1)$(E_END),$(if \
+							$(filter cyan,$2),$(E_START)[1;36m$(subst ",,$1)$(E_END),$1))))))
 # enable echo output styling
 PRINTLN := echo$(if $(ESC_SEQ), $(ESC_SEQ),)
 
@@ -301,9 +301,9 @@ RECIPE_DEBUG = $(if $(AT),,echo $1) $1
 
 
 # display complete info
-AT			=	$(if $(filter true,$(DISP_INFO)),,@)
--S			=	$(if $(filter true,$(DISP_INFO)),,-s)
--W			=	$(if $(filter true,$(DISP_INFO)),--print-directory,--no-print-directory)
+AT		=	$(if $(filter true,$(DISP_INFO)),,@)
+-S		=	$(if $(filter true,$(DISP_INFO)),,-s)
+-W		=	$(if $(filter true,$(DISP_INFO)),--print-directory,--no-print-directory)
 
 # outcome messages
 MESSAGE_0.0	:=	$(PRINTLN) $(call COLOR,Executing 'all' complete!,green)
@@ -316,7 +316,8 @@ MESSAGE_1.0	:=	$(PRINTLN) $(call COLOR,Removing files..,blue)
 MESSAGE_1.1	:=	$(PRINTLN) $(call COLOR,Removing directories..,blue)
 MESSAGE_1.2	:=	$(PRINTLN) $(call COLOR,Making directories..,blue)
 MESSAGE_1.3	:=	$(PRINTLN) $(call COLOR,Compilator..,blue)
-MESSAGE_1.4	:=	$(PRINTLN) $(call COLOR,Warning!,magenta) Attempt to handle the exception by enabling the "'-Ofast'" optimizer flag..
+MESSAGE_1.4	:=	$(PRINTLN) $(call COLOR,Assembler..,blue)
+MESSAGE_1.5	:=	$(PRINTLN) $(call COLOR,Warning!,magenta) Attempt to handle the exception by enabling the "'-Ofast'" optimizer flag..
 # body messages
 MESSAGE_2.0	:=	echo Creating dir:
 MESSAGE_2.1	=	echo Compiling object file: $@
@@ -324,11 +325,11 @@ MESSAGE_2.2	=	echo Assembling compiled objects into: $@
 MESSAGE_2.3	=	echo Running the executable: $(TARGET_OUTPUT)
 MESSAGE_2.4	:=	echo Removing:
 # footer messages
-MESSAGE_3.0	:=	echo Cleanup complete!
-MESSAGE_3.1	:=	echo Nothing to be deleted!
-MESSAGE_3.2	:=	echo Remake complete!
-MESSAGE_3.3	:=	echo Executing 'run: all' complete!
-MESSAGE_3.4	:=	echo Exceptions handler failed!
+MESSAGE_3.0	:=	$(PRINTLN) Cleanup complete! $(call COLOR,👍,green)
+MESSAGE_3.1	:=	$(PRINTLN) Nothing to be deleted! $(call COLOR,⚠️,yellow)
+MESSAGE_3.2	:=	$(PRINTLN) Remake complete! $(call COLOR,✔️,green)
+MESSAGE_3.3	:=	$(PRINTLN) Executing 'run: all' complete! $(call COLOR,✔️,green)
+MESSAGE_3.4	:=	$(PRINTLN) Exceptions handler failed! $(call COLOR,❌,red)
 
 
 
@@ -354,7 +355,7 @@ all: --directories
 
 # updates your objects, builds your executable
 $(TARGET_OUTPUT): $(OBJECTS)
-	@$(NL)$(BR) $(MESSAGE_2.2)
+	@$(NL)$(BR)  $(MESSAGE_1.4) $(BR) $(if $(AT),,$(NL)$(BR)) $(MESSAGE_2.2)
 	$(AT) $(CCX) $(CXXFLAGS) $^ -o $@ $(LFLAGS) $(LIBS) $(INCLUDES)
 
 
@@ -369,12 +370,10 @@ $(TARGET_OUTPUT): $(OBJECTS)
 # include all .d files
 -include $(DEPS)
 
-# builds your objects
-# -MMD generates dependency output files same name as the .o file
+# builds your objects and -MMD generates dependency files with the same name as the .o file
 $(OBJECT_DIR)/%.o: $(SRC_DIR)/%.$(SRCEXT)
-	$(if $(AT),@,@$(NL)$(BR)) $(MESSAGE_2.1)
+	@$(if $(AT),,$(NL)$(BR)) $(MESSAGE_2.1)
 	$(AT) $(CCX) $(CXXFLAGS) -c -MMD $< -o $@ $(LFLAGS) $(LIBS) $(INCLUDES)
-
 
 
 
@@ -388,7 +387,7 @@ $(OBJECT_DIR)/%.o: $(SRC_DIR)/%.$(SRCEXT)
 # recursive exceptions handler
 exp_handler:
 	@$(if $(if $(subst auto,,$(OPTIMIZER)),,true),\
-		$(NL)$(BR) $(MESSAGE_1.4) $(BR) $(NL)$(BR) \
+		$(NL)$(BR) $(MESSAGE_1.5) $(BR) $(NL)$(BR) \
 		$(MAKE) OPTIMIZER=true &&\
 			$(MESSAGE_0.1) $(BR) $(NL) \
 		|| $(NL)$(BR) $(MESSAGE_3.4) $(BR) $(EXIT1) $(BR)\
@@ -405,7 +404,6 @@ exp_handler:
 		$(if $(AT),,$(NL)$(BR))\
 		$(MESSAGE_2.0) $(TARGET_DIR) $(BR)\
 		$(call RECIPE_DEBUG, $(MD) $(TARGET_DIR) $(BR)))
-
 
 # Clean removes all the object and executable files
 clean:
@@ -453,7 +451,7 @@ help:
 	@$(PRINTLN) $(call COLOR,make,yellow) "clean  - removes object file folder and executable"
 	@$(PRINTLN) $(call COLOR,make,yellow) "remake - remake consist of cleaning and compiling all"
 	@$(PRINTLN) $(call COLOR,make,yellow) "run    - builds/updates everything, runs immediately"
-	@$(PRINTLN) $(call COLOR,make,yellow) "run?.. - unlike 'run', it allows passing arguments to the executable \
+	@$(PRINTLN) $(call COLOR,make,yellow) "run?.. - unlike 'run', it allows passing arguments to the executable\
 		(e.g: " $(call COLOR,make,yellow)" run?'My Arguments' OR " $(call COLOR,make,yellow)" run?MyArguments)"
 	@$(PRINTLN) $(call COLOR,make,yellow) "debug  - builds/updates everything displaying more detailed messages"
 	@$(NL)$(BR)
