@@ -390,7 +390,7 @@ exp_handler:
 		$(NL)$(BR) $(MESSAGE_1.5) $(BR) $(NL)$(BR) \
 		$(MAKE) OPTIMIZER=true &&\
 			$(MESSAGE_0.1) $(BR) $(NL) \
-		|| $(NL)$(BR) $(MESSAGE_3.4) $(BR) $(EXIT1) $(BR)\
+		|| ( $(NL)$(BR) $(MESSAGE_3.4) $(BR) $(EXIT1) $(BR) )\
 	,$(EXIT1) $(BR))
 
 # Make the Directories
