@@ -98,7 +98,7 @@ ifeq ($(OS),Windows_NT)
 		BR		:=	&
 		NL		:=	type nul | more /e /p
 		EXITSTATUS	:=	%errorlevel%
-		MAIN_MATCH	:=	"^[ ]*[unsigned ]*[void bool char short int long long long double ][ ][ ]*main[ ]*(.*)[ ]*{*"
+		MAIN_MATCH	:=	"^[ ]*[unsigned ]*[ ]*[void bool char short int long long long double ][ ][ ]*main[ ]*(.*)[ ]*{*"
 		SRCEXT_FIND	=	findstr /s /i /m /r /c:$(MAIN_MATCH) $(SRC_DIR)/*.$(if $(SRCEXT),$(SRCEXT),*)
 		EXIT1		=	$(if $(filter true,$(DISP_INFO)),exit 1,exit 1 >nul 2>&1)
 		FIXPATH		=	$(subst /,$\,$1)
@@ -166,8 +166,6 @@ TARGET_OUTPUT	:=	$(call FIXPATH,$(TARGET_DIR)/$(TARGET))
 #############################
 
 
-STD = $(subst p,+,$(SRCEXT))
-
 # define the compiler to use
 ifeq  ($(subst auto,,$(CCX)),)
 	ifeq ($(SRCEXT),c)
@@ -194,7 +192,7 @@ endif
 # define the lang support version
 ifeq ($(subst auto,,$(COMPILER_SUPPORT)),)
 	ifeq ($(STD),c)
-		COMPILER_SUPPORT := 99
+		COMPILER_SUPPORT := 11
 	else ifeq ($(STD),c++)
 		COMPILER_SUPPORT := 17
 	else
@@ -267,7 +265,7 @@ endif
 
 
 # define any compile-time flags
-CXXFLAGS	:= -std=$(STD)$(COMPILER_SUPPORT) $(OPT) -Wall $(CCXFLAGS) $(CWARNS) $(DEBUG)
+CXXFLAGS	:= $(if $(STD),-std=$(STD)$(COMPILER_SUPPORT),) $(OPT) -Wall $(CCXFLAGS) $(CWARNS) $(DEBUG)
 
 
 
