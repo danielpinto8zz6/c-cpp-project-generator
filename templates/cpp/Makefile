@@ -14,14 +14,14 @@
 	(if set to auto it will try to fetch it itslef. Alternatively enter it manually: cpp, c, ...)
 SRC_EXT				:=	auto
 # define the compiler to use (e.g: gcc, c++, ...)
-CCX					:=	auto
+CCX				:=	auto
 # define the compiler support version (e.g: 98, 99, 03, 11, 14, 17, 2a, ...)
-COMPILER_SUPPORT	:=	auto
+COMPILER_SUPPORT		:=	auto
 # to compile and optimize code (if set to false, the exceptions handler will not start, set to 'true' to get optimizer -Ofast,\
 	'auto' to handle it automatically or any optimizer else like: -O0, -O1, -O2, -O3, ...)
 OPTIMIZER			:=	auto
 # get general warnings (set to false to remove general warnings)
-GENERAL_WARNINGS	:=	true
+GENERAL_WARNINGS		:=	true
 # get larger amount of warnings (set to false to remove negligible warnings)
 USE_STRICT			:=	false
 
@@ -68,11 +68,11 @@ DISP_INFO			:=	false
 
 
 # literal whitespace
-s := $\ $\#
+s :=	$\ $\#
 # literal backslash
-\ := \\#
+\ :=	\\#
 # literal comma
-; := ,
+; :=	,
 
 # OS compatibility
 ifeq ($(OS),Windows_NT)
@@ -80,27 +80,27 @@ ifeq ($(OS),Windows_NT)
 	INCL_DIRS	:=	$(INCLUDE_DIR)
 	LIB_DIRS	:=	$(LIB_DIR)
 	ifeq ($(findstring cygwin, $(shell echo $$OSTYPE)),cygwin)
-		RM 			:=	rm -f
+		RM 		:=	rm -f
 		RMDIR		:=	$(RM)r
-		MD			:=	mkdir -p
+		MD		:=	mkdir -p
 		E_START		:=	"\e
 		E_END		:=	\e[0m"
 		ESC_SEQ		:=	-e
-		BR			:=	;
-		NL			:=	echo
+		BR		:=	;
+		NL		:=	echo
 		EXITSTATUS	:=	$$?
 		MAIN_MATCH	:=	"^(\s)*(unsigned\s+)?(void|bool|short|int|long|long\s+long|double|char)\s+main\s*\((\s|\S)*\)\s*\{?"
 		SRCEXT_FIND	=	egrep -E --include=\*.$(if $(SRCEXT),$(SRCEXT),*) -rnwl $(SRC_DIR) -e $(MAIN_MATCH)
 		EXIT1		=	$(if $(filter true,$(DISP_INFO)),exit 1,exit 1 &> /dev/null)
 		FIXPATH		=	$1
 	else
-		RM			:=	DEL /F/Q
+		RM		:=	DEL /F/Q
 		RMDIR		:=	RMDIR /Q/S
-		MD			:=	MKDIR
+		MD		:=	MKDIR
 		E_START		:=	
 		E_END		:=	[0m
-		BR			:=	&
-		NL			:=	type nul | more /e /p
+		BR		:=	&
+		NL		:=	type nul | more /e /p
 		EXITSTATUS	:=	%errorlevel%
 		MAIN_MATCH	:=	"^[ ]*[unsigned ]*[ ]*[void bool char short int long long long double][ ][ ]*main[ ]*(.*)[ ]*{*"
 		SRCEXT_FIND	=	findstr /s /i /m /r /c:$(MAIN_MATCH) $(SRC_DIR)/*.$(if $(SRCEXT),$(SRCEXT),*)
@@ -111,13 +111,13 @@ else
 	SRC_DIR		:=	$(shell find $(SRC_DIR) -type d)
 	INCL_DIRS	:=	$(shell find $(INCLUDE_DIR) -type d)
 	LIB_DIRS	:=	$(shell find $(LIB_DIR) -type d)
-	RM 			:=	rm -f
+	RM 		:=	rm -f
 	RMDIR		:=	$(RM)r
-	MD			:=	mkdir -p
+	MD		:=	mkdir -p
 	E_START		:=	"\033
 	E_END		:=	\033[0m"
-	BR			:=	;
-	NL			:=	echo
+	BR		:=	;
+	NL		:=	echo
 	EXITSTATUS	:=	$$?
 	MAIN_MATCH	:=	"^(\s)*(unsigned\s+)?(void|bool|short|int|long|long\s+long|double|char)\s+main\s*\((\s|\S)*\)\s*\{?"
 	SRCEXT_FIND	=	egrep -E --include=\*.$(if $(SRCEXT),$(SRCEXT),*) -rnwl $(SRC_DIR) -e $(MAIN_MATCH)
@@ -302,9 +302,9 @@ RECIPE_DEBUG = $(if $(AT),,echo $1) $1
 
 
 # display complete info
-AT			=	$(if $(filter true,$(DISP_INFO)),,@)
--S			=	$(if $(filter true,$(DISP_INFO)),,-s)
--W			=	$(if $(filter true,$(DISP_INFO)),--print-directory,--no-print-directory)
+AT		=	$(if $(filter true,$(DISP_INFO)),,@)
+-S		=	$(if $(filter true,$(DISP_INFO)),,-s)
+-W		=	$(if $(filter true,$(DISP_INFO)),--print-directory,--no-print-directory)
 
 # outcome messages
 MESSAGE_0.0	:=	$(PRINTLN) $(call COLOR,Executing 'all' complete!,green)
