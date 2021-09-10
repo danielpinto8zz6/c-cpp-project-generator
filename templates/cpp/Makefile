@@ -12,47 +12,47 @@
 
 # sources extension corrisponds to the "project language"\
 	(if set to auto it will try to fetch it itslef. Alternatively enter it manually: cpp, c, ...)
-SRC_EXT				:=	auto
+SRC_EXT			:=	auto
 # define the compiler to use (e.g: gcc, c++, ...)
-CCX				:=	auto
+CCX			:=	auto
 # define the compiler support version (e.g: 98, 99, 03, 11, 14, 17, 2a, ...)
-COMPILER_SUPPORT		:=	auto
+COMPILER_SUPPORT	:=	auto
 # to compile and optimize code (if set to false, the exceptions handler will not start, set to 'true' to get optimizer -Ofast,\
 	'auto' to handle it automatically or any optimizer else like: -O0, -O1, -O2, -O3, ...)
-OPTIMIZER			:=	auto
+OPTIMIZER		:=	auto
 # get general warnings (set to false to remove general warnings)
-GENERAL_WARNINGS		:=	true
+GENERAL_WARNINGS	:=	true
 # get larger amount of warnings (set to false to remove negligible warnings)
-USE_STRICT			:=	false
+USE_STRICT		:=	false
 
 
 
 # define the executable output name (if set to auto it will automatically be assigned the main file name)
-TARGET_NAME			:=	auto
+TARGET_NAME		:=	auto
 # custom flags:
-LFLAGS				:=
-CCXFLAGS			:=
+LFLAGS			:=
+CCXFLAGS		:=
 # debug
-DEBUG				:=	-g
+DEBUG			:=	-g
 
 # define library paths in addition to /usr/lib
 #   if I wanted to include libraries not in /usr/lib I'd specify
-#   their path using -Lpath, something like:
+#   their path using -Lpath.
 
+# define executable directory
+TARGET_DIR		:=	build
 # define output directory
-TARGET_DIR			:=	build
-# define output directory
-OBJECT_DIR			:=	bin
+OBJECT_DIR		:=	bin
 # define source directory 
-SRC_DIR				:=	src
+SOURCE_DIR		:=	src
 # define include directory
-INCLUDE_DIR			:=	include
-# define lib directory
-LIB_DIR				:=	lib
+INCLUDE_DIR		:=	include
+# define library directory
+LIBRARY_DIR		:=	lib
 
 
 # display complete info (this is automatically set to true when "make debug" is called)
-DISP_INFO			:=	false
+DISP_INFO		:=	false
 
 
 
@@ -68,17 +68,26 @@ DISP_INFO			:=	false
 
 
 # literal whitespace
-s :=	$\ $\#
+s 		:=	$\ $\#
 # literal backslash
-\ :=	\\#
+\ 		:=	\\#
 # literal comma
-; :=	,
+; 		:=	,
+# directories separator
+DIRSEP		=	$(if $1,$1/,)
+# determines if a name is a directory or a file
+IS_DIR		=	$(if $(realpath $1/),$(patsubst %/,%,$(wildcard $1)),)
+# determines if a name exists as a file or a directory
+EXISTS		=	$(patsubst %/,%,$(wildcard $1))
+
+# directories
+SRC_DIR		:=	$(call IS_DIR,$(SOURCE_DIR))
+INCL_DIRS	:=	$(call IS_DIR,$(INCLUDE_DIR))
+LIB_DIRS	:=	$(call IS_DIR,$(LIBRARY_DIR))
 
 # OS compatibility
 ifeq ($(OS),Windows_NT)
 	OS_EXE		:=	.exe
-	INCL_DIRS	:=	$(INCLUDE_DIR)
-	LIB_DIRS	:=	$(LIB_DIR)
 	ifeq ($(findstring cygwin, $(shell echo $$OSTYPE)),cygwin)
 		RM 		:=	rm -f
 		RMDIR		:=	$(RM)r
@@ -103,14 +112,11 @@ ifeq ($(OS),Windows_NT)
 		NL		:=	type nul | more /e /p
 		EXITSTATUS	:=	%errorlevel%
 		MAIN_MATCH	:=	"^[ ]*[unsigned ]*[ ]*[void bool char short int long long long double][ ][ ]*main[ ]*(.*)[ ]*{*"
-		SRCEXT_FIND	=	findstr /s /i /m /r /c:$(MAIN_MATCH) $(SRC_DIR)/*.$(if $(SRCEXT),$(SRCEXT),*)
+		SRCEXT_FIND	=	findstr /s /i /m /r /c:$(MAIN_MATCH) $(call DIRSEP,$(SRC_DIR))*.$(if $(SRCEXT),$(SRCEXT),*)
 		EXIT1		=	$(if $(filter true,$(DISP_INFO)),exit 1,exit 1 >nul 2>&1)
 		FIXPATH		=	$(subst /,$\,$1)
 	endif
 else
-	SRC_DIR		:=	$(shell find $(SRC_DIR) -type d)
-	INCL_DIRS	:=	$(shell find $(INCLUDE_DIR) -type d)
-	LIB_DIRS	:=	$(shell find $(LIB_DIR) -type d)
 	RM 		:=	rm -f
 	RMDIR		:=	$(RM)r
 	MD		:=	mkdir -p
@@ -131,13 +137,13 @@ SRCEXT0		:=	$(if $(subst auto,,$(SRC_EXT)),$(subst $s,,$(SRC_EXT)),$(firstword $
 					$(filter %.cpp %.c,$(shell $(SRCEXT_FIND))))))))
 # final attempt to get the extension
 SRCEXT		:=	$(if $(SRCEXT0),$(SRCEXT0),$(firstword $(patsubst .%,%,$(filter .%,$(suffix\
-					$(filter %.cpp %.c,$(wildcard $(SRC_DIR)/*.*)))))))
+					$(filter %.cpp %.c,$(wildcard $(call DIRSEP,$(SRC_DIR))*.*)))))))
 
 # automatically generate target name by using the main file name
 TARGET_N0	:=	$(subst $s,,$(if $(subst auto,,$(TARGET_NAME)),$(subst $s,_,$(TARGET_NAME)),\
 							$(basename $(notdir $(shell $(SRCEXT_FIND))))))
 # final attempt to get the name				
-FILES_NAME	:=	$(basename $(notdir $(wildcard $(SRC_DIR)/*.$(SRCEXT))))
+FILES_NAME	:=	$(basename $(notdir $(wildcard $(call DIRSEP,$(SRC_DIR))*.$(SRCEXT))))
 TARGET_N	:=	$(subst $s,,$(if $(TARGET_N0),$(TARGET_N0),$(if $(filter 1,$(words $(FILES_NAME))),$(FILES_NAME),)))
 
 # setting target name and extension
@@ -145,17 +151,17 @@ TARGET		:=	$(if $(TARGET_N),$(TARGET_N),a)$(OS_EXE)
 
 # define any directories containing header files other than /usr/include
 INCLUDES	:=	$(patsubst %,-I%, $(INCL_DIRS:%/=%))
-# define the C libs
+# define the C/C++ libs
 LIBS		:=	$(patsubst %,-L%, $(LIB_DIRS:%/=%))
-# define the C source files
-SOURCES		:=	$(wildcard $(patsubst %,%/*.$(SRCEXT), $(SRC_DIR)))
+# define the C/C++ source files
+SOURCES		:=	$(wildcard $(call DIRSEP,$(SRC_DIR))*.$(SRCEXT))
 
 # finds objects that corrispond to the src files, system agnostic version
-OBJECTS		:=	$(patsubst $(SRC_DIR)/%.$(SRCEXT),$(OBJECT_DIR)/%.o, $(SOURCES))
+OBJECTS		:=	$(patsubst $(call DIRSEP,$(SRC_DIR))%.$(SRCEXT),$(call DIRSEP,$(OBJECT_DIR))%.o, $(SOURCES))
 # define the dependency output files
 DEPS		:=	$(OBJECTS:.o=.d)
 # defining target directory
-TARGET_OUTPUT	:=	$(call FIXPATH,$(TARGET_DIR)/$(TARGET))
+TARGET_OUTPUT	:=	$(call FIXPATH,$(call DIRSEP,$(TARGET_DIR))$(TARGET))
 #
 # The following part of the makefile is generic; it can be used to 
 # build any executable just by changing the definitions above and by
@@ -277,7 +283,7 @@ CXXFLAGS	:= $(if $(STD),-std=$(STD)$(COMPILER_SUPPORT),) $(OPT) -Wall $(CCXFLAGS
 
 
 # equals operator
-EQUALS = $(if $(subst $(words $1),,$(words $2)),,$(if $(subst $1,,$2),,$(if $(subst $2,,$1),,true)))
+EQUALS = $(if $(subst $(words $1),,$(words $2)),,$(if $(subst $1,,$2),,$(if $(subst $2,,$1),,$(if $1,$1,true))))
 
 # chose text style
 COLOR = $(if $(filter red,$2),$(E_START)[1;31m$(subst ",,$1)$(E_END),$(if \
@@ -311,7 +317,9 @@ MESSAGE_0.0	:=	$(PRINTLN) $(call COLOR,Executing 'all' complete!,green)
 MESSAGE_0.1	:=	$(PRINTLN) $(call COLOR,Executing 'all' complete by using '-Ofast' optimizer flag!,yellow)
 MESSAGE_0.2	:=	$(PRINTLN) $(call COLOR,Executing 'all' failed!,red)
 MESSAGE_0.3	=	$(PRINTLN) $(call COLOR,Executable,green)" '$(TARGET_OUTPUT)' "$(call COLOR,is already up to date!,green)
-MESSAGE_0.4	:=	$(PRINTLN) $(call COLOR,Language detection failed! Please$; fill manually the Makefile 'SRC_EXT' variable,red)
+MESSAGE_0.4	:=	$(PRINTLN) $(call COLOR,Language detection failed! Please$; fill manually the Makefile 'SRC_EXT' variable.,red)
+MESSAGE_0.5	:=	$(PRINTLN) $(call COLOR,Source files not found! Please$; set properly the Makefile 'SOURCE_DIR' variable.,red)
+MESSAGE_0.6	:=	$(PRINTLN) $(call COLOR,Src-dir '$(SOURCE_DIR)' not found! Please$; set properly the Makefile 'SOURCE_DIR' variable.,red)
 # header messages
 MESSAGE_1.0	:=	$(PRINTLN) $(call COLOR,Removing files..,blue)
 MESSAGE_1.1	:=	$(PRINTLN) $(call COLOR,Removing directories..,blue)
@@ -345,14 +353,18 @@ MESSAGE_3.4	:=	$(PRINTLN) "Exceptions handler failed! "$(call COLOR,❌,red)
 all:
 	@$(MAKE) $(-S) directories
 	@$(NL)$(BR)
-	@$(if $(SRCEXT),\
-		$(if $(if $(shell $(MAKE) $(-S) -q $(TARGET_OUTPUT) || echo 1),,true),\
-			$(MESSAGE_0.3) $(BR) \
-		,$(MESSAGE_1.3) && $(MAKE) $(-W) $(TARGET_OUTPUT) && \
-			( $(NL)$(BR) $(MESSAGE_0.0) )\
-		|| $(MAKE) $(-S) exp_handler || \
-			( $(if $(call EQUALS,true,$(OPTIMIZER)),, $(NL)$(BR) $(MESSAGE_0.2) $(BR)) $(EXIT1) ))\
-	,$(MESSAGE_0.4) $(BR))
+	@$(if $(call EQUALS,$(SRC_DIR),$(SOURCE_DIR)),\
+		$(if $(SOURCES),\
+			$(if $(SRCEXT),\
+				$(if $(if $(shell $(MAKE) $(-S) -q $(TARGET_OUTPUT) || echo 1),,true),\
+					$(MESSAGE_0.3) $(BR) \
+				,$(MESSAGE_1.3) && $(MAKE) $(-W) $(TARGET_OUTPUT) && \
+					( $(NL)$(BR) $(MESSAGE_0.0) )\
+				|| $(MAKE) $(-S) exp_handler || \
+					( $(if $(call EQUALS,true,$(OPTIMIZER)),, $(NL)$(BR) $(MESSAGE_0.2) $(BR)) $(EXIT1) ))\
+			,$(MESSAGE_0.4) $(BR))\
+		,$(MESSAGE_0.5) $(BR))\
+	,$(MESSAGE_0.6) $(BR))
 	
 
 # updates your objects, builds your executable
@@ -373,7 +385,7 @@ $(TARGET_OUTPUT): $(OBJECTS)
 -include $(DEPS)
 
 # builds your objects and -MMD generates dependency files with the same name as the .o file
-$(OBJECT_DIR)/%.o: $(SRC_DIR)/%.$(SRCEXT)
+$(call DIRSEP,$(OBJECT_DIR))%.o: $(call DIRSEP,$(SRC_DIR))%.$(SRCEXT)
 	@$(if $(AT),,$(NL)$(BR)) $(MESSAGE_2.1)
 	$(AT) $(CCX) $(CXXFLAGS) -c -MMD $< -o $@ $(LFLAGS) $(LIBS) $(INCLUDES)
 
@@ -397,30 +409,35 @@ exp_handler:
 
 # Make the Directories
 directories:
-	$(if $(if $(wildcard $(OBJECT_DIR)/),,void)$(if $(wildcard $(TARGET_DIR)/),,void), @$(NL)$(BR) $(MESSAGE_1.2),)
-	$(if $(wildcard $(OBJECT_DIR)/),,@\
-		$(if $(AT),,$(NL)$(BR))\
-		$(MESSAGE_2.0) $(OBJECT_DIR) $(BR)\
-		$(call RECIPE_DEBUG, $(MD) $(OBJECT_DIR) $(BR)))
-	$(if $(wildcard $(TARGET_DIR)/),,@\
-		$(if $(AT),,$(NL)$(BR))\
-		$(MESSAGE_2.0) $(TARGET_DIR) $(BR)\
-		$(call RECIPE_DEBUG, $(MD) $(TARGET_DIR) $(BR)))
+	$(if $(if $(wildcard $(call DIRSEP,$(OBJECT_DIR))),,void)$(if $(wildcard $(call DIRSEP,$(TARGET_DIR))),,void),\
+		$(if $(OBJECT_DIR)$(TARGET_DIR),@$(NL)$(BR) $(MESSAGE_1.2),),)
+	$(if $(OBJECT_DIR),\
+		$(if $(wildcard $(call DIRSEP,$(OBJECT_DIR))),,@\
+			$(if $(AT),,$(NL)$(BR))\
+			$(MESSAGE_2.0) $(OBJECT_DIR) $(BR)\
+			$(call RECIPE_DEBUG, $(MD) $(OBJECT_DIR) $(BR))),)
+	$(if $(TARGET_DIR),\
+		$(if $(wildcard $(call DIRSEP,$(TARGET_DIR))),,@\
+			$(if $(AT),,$(NL)$(BR))\
+			$(MESSAGE_2.0) $(TARGET_DIR) $(BR)\
+			$(call RECIPE_DEBUG, $(MD) $(TARGET_DIR) $(BR))),)
 
 # Clean removes all the object and executable files
 clean:
 	@$(NL)$(BR)
-	@$(if $(wildcard $(OBJECT_DIR)/)$(wildcard $(TARGET_DIR)/),\
-		$(MESSAGE_1.0) $(BR)\
-		$(MESSAGE_2.4) $(call FIXPATH,$(TARGET_OUTPUT)) $(BR)\
-		$(call RECIPE_DEBUG, $(RM) $(TARGET_OUTPUT) $(BR))\
-		$(MESSAGE_2.4) $(call FIXPATH,$(OBJECTS)) $(BR)\
-		$(call RECIPE_DEBUG, $(RM) $(call FIXPATH,$(OBJECTS)) $(BR)) \
-		$(MESSAGE_2.4) $(call FIXPATH,$(DEPS)) $(BR)\
-		$(call RECIPE_DEBUG, $(RM) $(call FIXPATH,$(DEPS)) $(BR)) \
-		$(NL)$(BR) $(MESSAGE_1.1) $(BR)\
-		$(MESSAGE_2.4) $(OBJECT_DIR) $(TARGET_DIR) $(BR)\
-		$(call RECIPE_DEBUG, $(RMDIR) $(OBJECT_DIR) $(TARGET_DIR) $(BR)) \
+	@$(if $(wildcard $(TARGET_OUTPUT) $(OBJECTS) $(DEPS)) $(wildcard $(call DIRSEP,$(OBJECT_DIR)))$(wildcard $(call DIRSEP,$(TARGET_DIR))),\
+		$(if $(wildcard $(TARGET_OUTPUT) $(OBJECTS) $(DEPS)),\
+			$(MESSAGE_1.0) $(BR)\
+			$(MESSAGE_2.4) $(call FIXPATH,$(TARGET_OUTPUT)) $(BR)\
+			$(call RECIPE_DEBUG, $(RM) $(TARGET_OUTPUT) $(BR))\
+			$(MESSAGE_2.4) $(call FIXPATH,$(OBJECTS)) $(BR)\
+			$(call RECIPE_DEBUG, $(RM) $(call FIXPATH,$(OBJECTS)) $(BR)) \
+			$(MESSAGE_2.4) $(call FIXPATH,$(DEPS)) $(BR)\
+			$(call RECIPE_DEBUG, $(RM) $(call FIXPATH,$(DEPS)) $(BR)),)\
+		$(if $(wildcard $(call DIRSEP,$(OBJECT_DIR)))$(wildcard $(call DIRSEP,$(TARGET_DIR))),\
+			$(NL)$(BR) $(MESSAGE_1.1) $(BR)\
+			$(MESSAGE_2.4) $(OBJECT_DIR) $(TARGET_DIR) $(BR)\
+			$(call RECIPE_DEBUG, $(RMDIR) $(OBJECT_DIR) $(TARGET_DIR) $(BR)),)\
 		$(NL)$(BR) $(MESSAGE_3.0) $(BR)\
 	,$(MESSAGE_3.1) $(BR))
 
