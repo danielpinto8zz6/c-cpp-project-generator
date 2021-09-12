@@ -12,47 +12,47 @@
 
 # sources extension corrisponds to the "project language"\
 	(if set to auto it will try to fetch it itslef. Alternatively enter it manually: cpp, c, ...)
-SRC_EXT			:=	auto
+SRC_EXT				:=	auto
 # define the compiler to use (e.g: gcc, c++, ...)
-CCX			:=	auto
+CCX				:=	auto
 # define the compiler support version (e.g: 98, 99, 03, 11, 14, 17, 2a, ...)
-COMPILER_SUPPORT	:=	auto
+COMPILER_SUPPORT		:=	auto
 # to compile and optimize code (if set to false, the exceptions handler will not start, set to 'true' to get optimizer -Ofast,\
 	'auto' to handle it automatically or any optimizer else like: -O0, -O1, -O2, -O3, ...)
-OPTIMIZER		:=	auto
+OPTIMIZER			:=	auto
 # get general warnings (set to false to remove general warnings)
-GENERAL_WARNINGS	:=	true
+GENERAL_WARNINGS		:=	true
 # get larger amount of warnings (set to false to remove negligible warnings)
-USE_STRICT		:=	false
+USE_STRICT			:=	false
 
 
 
 # define the executable output name (if set to auto it will automatically be assigned the main file name)
-TARGET_NAME		:=	auto
+TARGET_NAME			:=	auto
 # custom flags:
-LFLAGS			:=
-CCXFLAGS		:=
+LFLAGS				:=
+CCXFLAGS			:=
 # debug
-DEBUG			:=	-g
+DEBUG				:=	-g
 
 # define library paths in addition to /usr/lib
 #   if I wanted to include libraries not in /usr/lib I'd specify
 #   their path using -Lpath.
 
 # define executable directory
-TARGET_DIR		:=	build
+TARGET_DIR			:=	build
 # define output directory
-OBJECT_DIR		:=	bin
+OBJECT_DIR			:=	bin
 # define source directory 
-SOURCE_DIR		:=	src
+SOURCE_DIR			:=	src
 # define include directory
-INCLUDE_DIR		:=	include
+INCLUDE_DIR			:=	include
 # define library directory
-LIBRARY_DIR		:=	lib
+LIBRARY_DIR			:=	lib
 
 
 # display complete info (this is automatically set to true when "make debug" is called)
-DISP_INFO		:=	false
+DISP_INFO			:=	false
 
 
 
@@ -67,12 +67,23 @@ DISP_INFO		:=	false
 #############################
 
 
+# get Operative System name
+OS			:=	$(if $(OS),$(OS),$(if $(findstring Darwin,$(shell echo $$(uname))),Mac_OS,$(shell echo $$(uname))))
+# get cpu architecture info
+PROCESSOR_ARCHITECTURE	:=	$(if $(PROCESSOR_ARCHITECTURE),$(PROCESSOR_ARCHITECTURE),$(shell echo $$(uname -p)))
+# get environment info
+TERMINAL		:=	$(if $(filter-out $$(uname),$(shell echo $$(uname))),$(shell echo $$(uname)),$(if $(findstring Windows,$(OS)),MinGW,))
+
 # literal whitespace
-s 		:=	$\ $\#
+s 			:=	$\ $\#
 # literal backslash
-\ 		:=	\\#
+\ 			:=	\\#
 # literal comma
-; 		:=	,
+; 			:=	,
+#literal double quotess
+"			:=	"
+"			:=	$(if $(findstring MinGW,$(TERMINAL)),,$")
+
 # directories separator
 DIRSEP		=	$(if $1,$1/,)
 # determines if a name is a directory or a file
@@ -308,9 +319,9 @@ RECIPE_DEBUG = $(if $(AT),,echo $1) $1
 
 
 # display complete info
-AT		=	$(if $(filter true,$(DISP_INFO)),,@)
--S		=	$(if $(filter true,$(DISP_INFO)),,-s)
--W		=	$(if $(filter true,$(DISP_INFO)),--print-directory,--no-print-directory)
+AT			=	$(if $(filter true,$(DISP_INFO)),,@)
+-S			=	$(if $(filter true,$(DISP_INFO)),,-s)
+-W			=	$(if $(filter true,$(DISP_INFO)),--print-directory,--no-print-directory)
 
 # outcome messages
 MESSAGE_0.0	:=	$(PRINTLN) $(call COLOR,Executing 'all' complete!,green)
@@ -326,19 +337,21 @@ MESSAGE_1.1	:=	$(PRINTLN) $(call COLOR,Removing directories..,blue)
 MESSAGE_1.2	:=	$(PRINTLN) $(call COLOR,Making directories..,blue)
 MESSAGE_1.3	:=	$(PRINTLN) $(call COLOR,Compilator..,blue)
 MESSAGE_1.4	:=	$(PRINTLN) $(call COLOR,Assembler..,blue)
-MESSAGE_1.5	:=	$(PRINTLN) $(call COLOR,Warning!,magenta)" Attempt to handle the exception by enabling the '-Ofast' optimizer flag.."
+MESSAGE_1.5	:=	$(PRINTLN) $(call COLOR,Warning!,magenta)$" Attempt to handle the exception by enabling the '-Ofast' optimizer flag..$"
+MESSAGE_1.6	:=	$(PRINTLN) $(call COLOR,MAKE HELP..,blue)
+MESSAGE_1.7	:=	$(PRINTLN) $(call COLOR,Environment Info..,blue)
 # body messages
-MESSAGE_2.0	:=	echo "Creating dir:"
-MESSAGE_2.1	=	echo "Compiling object file: $@"
-MESSAGE_2.2	=	echo "Assembling compiled objects into: $@"
-MESSAGE_2.3	=	echo "Running the executable: $(TARGET_OUTPUT)"
-MESSAGE_2.4	:=	echo "Removing:"
+MESSAGE_2.0	:=	echo $"Creating dir:$"
+MESSAGE_2.1	=	echo $"Compiling object file: $@$"
+MESSAGE_2.2	=	echo $"Assembling compiled objects into: $@$"
+MESSAGE_2.3	=	echo $"Running the executable: $(TARGET_OUTPUT)$"
+MESSAGE_2.4	:=	echo $"Removing$"
 # footer messages
-MESSAGE_3.0	:=	$(PRINTLN) "Cleanup complete! "$(call COLOR,👍,green)
-MESSAGE_3.1	:=	$(PRINTLN) "Nothing to be deleted! "$(call COLOR,⚠️,yellow)
-MESSAGE_3.2	:=	$(PRINTLN) "Remake complete! "$(call COLOR,✔️,green)
-MESSAGE_3.3	:=	$(PRINTLN) "Executing 'run: all' complete! "$(call COLOR,✔️,green)
-MESSAGE_3.4	:=	$(PRINTLN) "Exceptions handler failed! "$(call COLOR,❌,red)
+MESSAGE_3.0	:=	$(PRINTLN) $"Cleanup complete! $"$(call COLOR,👍,green)
+MESSAGE_3.1	:=	$(PRINTLN) $"Nothing to be deleted! $"$(call COLOR,⚠️,yellow)
+MESSAGE_3.2	:=	$(PRINTLN) $"Remake complete! $"$(call COLOR,✔️,green)
+MESSAGE_3.3	:=	$(PRINTLN) $"Executing 'run' complete! $"$(call COLOR,✔️,green)
+MESSAGE_3.4	:=	$(PRINTLN) $"Exceptions handler failed! $"$(call COLOR,❌,red)
 
 
 
@@ -425,18 +438,18 @@ directories:
 # Clean removes all the object and executable files
 clean:
 	@$(NL)$(BR)
-	@$(if $(wildcard $(TARGET_OUTPUT) $(OBJECTS) $(DEPS)) $(wildcard $(call DIRSEP,$(OBJECT_DIR)))$(wildcard $(call DIRSEP,$(TARGET_DIR))),\
+	@$(if $(wildcard $(TARGET_OUTPUT) $(OBJECTS) $(DEPS))$(wildcard $(call DIRSEP,$(OBJECT_DIR)))$(wildcard $(call DIRSEP,$(TARGET_DIR))),\
 		$(if $(wildcard $(TARGET_OUTPUT) $(OBJECTS) $(DEPS)),\
 			$(MESSAGE_1.0) $(BR)\
-			$(MESSAGE_2.4) $(call FIXPATH,$(TARGET_OUTPUT)) $(BR)\
+			$(MESSAGE_2.4)$" executables:	$"$(call FIXPATH,$(TARGET_OUTPUT)) $(BR)\
 			$(call RECIPE_DEBUG, $(RM) $(TARGET_OUTPUT) $(BR))\
-			$(MESSAGE_2.4) $(call FIXPATH,$(OBJECTS)) $(BR)\
+			$(MESSAGE_2.4)$" objects:	$"$(call FIXPATH,$(OBJECTS)) $(BR)\
 			$(call RECIPE_DEBUG, $(RM) $(call FIXPATH,$(OBJECTS)) $(BR)) \
-			$(MESSAGE_2.4) $(call FIXPATH,$(DEPS)) $(BR)\
+			$(MESSAGE_2.4)$" dependencies:	$"$(call FIXPATH,$(DEPS)) $(BR)\
 			$(call RECIPE_DEBUG, $(RM) $(call FIXPATH,$(DEPS)) $(BR)),)\
 		$(if $(wildcard $(call DIRSEP,$(OBJECT_DIR)))$(wildcard $(call DIRSEP,$(TARGET_DIR))),\
 			$(NL)$(BR) $(MESSAGE_1.1) $(BR)\
-			$(MESSAGE_2.4) $(OBJECT_DIR) $(TARGET_DIR) $(BR)\
+			$(MESSAGE_2.4): $(OBJECT_DIR) $(TARGET_DIR) $(BR)\
 			$(call RECIPE_DEBUG, $(RMDIR) $(OBJECT_DIR) $(TARGET_DIR) $(BR)),)\
 		$(NL)$(BR) $(MESSAGE_3.0) $(BR)\
 	,$(MESSAGE_3.1) $(BR))
@@ -465,14 +478,20 @@ debug:
 
 # Help is intended to provide the user a minimum of guide-lines
 help:
-	@$(NL)$(BR)
-	@$(PRINTLN) $(call COLOR,make,yellow)"        - builds/updates everything, is ready to run with $(TARGET_OUTPUT) after completion"
-	@$(PRINTLN) $(call COLOR,make,yellow)" clean  - removes object file folder and executable"
-	@$(PRINTLN) $(call COLOR,make,yellow)" remake - remake consist of cleaning and compiling all"
-	@$(PRINTLN) $(call COLOR,make,yellow)" run    - builds/updates everything, runs immediately"
-	@$(PRINTLN) $(call COLOR,make,yellow)" run?.. - unlike 'run', it allows passing arguments to the executable "\
-		"(e.g:" $(call COLOR,make,yellow)" run?'My Arguments' OR "$(call COLOR,make,yellow)" run?MyArguments)"
-	@$(PRINTLN) $(call COLOR,make,yellow)" debug  - builds/updates everything displaying more detailed messages"
+	$(if $(findstring MinGW,$(TERMINAL)),@echo,)
+	@$(NL)$(BR) $(NL)$(BR) $(MESSAGE_1.6) $(BR) $(NL)$(BR)
+	@$(PRINTLN) $(call COLOR,make,yellow)$"        - builds/updates everything, is ready to run with $(TARGET_OUTPUT) after completion$"
+	@$(PRINTLN) $(call COLOR,make,yellow)$" clean  - removes object, file, folder and executable$"
+	@$(PRINTLN) $(call COLOR,make,yellow)$" remake - remake consist of cleaning and compiling all$"
+	@$(PRINTLN) $(call COLOR,make,yellow)$" run    - builds/updates everything, runs immediately$"
+	@$(PRINTLN) $(call COLOR,make,yellow)$" run?.. - unlike 'run', it allows passing arguments to the executable $"\
+		$"(e.g:$" $(call COLOR,make,yellow)$" run?'My Arguments' OR $"$(call COLOR,make,yellow)$" run?MyArguments)$"
+	@$(PRINTLN) $(call COLOR,make,yellow)$" debug  - builds/updates everything displaying more detailed messages$"
+	@$(NL)$(BR) $(MESSAGE_1.7)
+	@$(PRINTLN) $"Operative System:	$"$(call COLOR,$(if $(OS)$(PROCESSOR_ARCHITECTURE),$(OS) ($(PROCESSOR_ARCHITECTURE)),Unknown),$(if $(OS)$(PROCESSOR_ARCHITECTURE),green,red))
+	@$(PRINTLN) $"Terminal:		$"$(call COLOR,$(if $(TERMINAL),$(TERMINAL),Unknown),$(if $(TERMINAL),green,red))
+	@$(PRINTLN) $"Main src file name:	$"$(call COLOR,$(if $(TARGET_N),$(TARGET_N),Unknown),$(if $(TARGET_N),green,red))
+	@$(PRINTLN) $"Detected Language:	$"$(call COLOR,$(if $(SRCEXT),$(SRCEXT),Unknown),$(if $(SRCEXT),green,red))
 	@$(NL)$(BR)
 
 # Non-File Targets
