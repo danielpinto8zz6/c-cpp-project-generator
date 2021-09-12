@@ -478,7 +478,7 @@ debug:
 
 # Help is intended to provide the user a minimum of guide-lines
 help:
-	$(if $(findstring MinGW,$(TERMINAL)),@echo 2>nul,)
+	$(if $(findstring MinGW,$(TERMINAL)),@echo >nul,)
 	@$(NL)$(BR) $(NL)$(BR) $(MESSAGE_1.6) $(BR) $(NL)$(BR)
 	@$(PRINTLN) $(call COLOR,make,yellow)$"        - builds/updates everything, is ready to run with $(TARGET_OUTPUT) after completion$"
 	@$(PRINTLN) $(call COLOR,make,yellow)$" clean  - removes object, file, folder and executable$"
