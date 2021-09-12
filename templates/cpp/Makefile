@@ -123,7 +123,7 @@ ifeq ($(OS),Windows_NT)
 		NL		:=	type nul | more /e /p
 		EXITSTATUS	:=	%errorlevel%
 		MAIN_MATCH	:=	"^[ ]*[unsigned ]*[ ]*[void bool char short int long long long double][ ][ ]*main[ ]*(.*)[ ]*{*"
-		SRCEXT_FIND	=	findstr /s /i /m /r /c:$(MAIN_MATCH) $(call DIRSEP,$(SRC_DIR))*.$(if $(SRCEXT),$(SRCEXT),*)
+		SRCEXT_FIND	=	findstr /s /i /m /r /c:$(MAIN_MATCH) $(call DIRSEP,$(SRC_DIR))*.$(if $(SRCEXT),$(SRCEXT),*) 2>nul
 		EXIT1		=	$(if $(filter true,$(DISP_INFO)),exit 1,exit 1 >nul 2>&1)
 		FIXPATH		=	$(subst /,$\,$1)
 	endif
@@ -143,7 +143,7 @@ else
 endif
 
 
-# project language detector ('$s ' stands for literal space)
+# project language detector ('$s' stands for literal space)
 SRCEXT0		:=	$(if $(subst auto,,$(SRC_EXT)),$(subst $s,,$(SRC_EXT)),$(firstword $(patsubst .%,%,$(filter .%,$(suffix\
 					$(filter %.cpp %.c,$(shell $(SRCEXT_FIND))))))))
 # final attempt to get the extension
@@ -478,7 +478,7 @@ debug:
 
 # Help is intended to provide the user a minimum of guide-lines
 help:
-	$(if $(findstring MinGW,$(TERMINAL)),@echo,)
+	$(if $(findstring MinGW,$(TERMINAL)),@echo 2>nul,)
 	@$(NL)$(BR) $(NL)$(BR) $(MESSAGE_1.6) $(BR) $(NL)$(BR)
 	@$(PRINTLN) $(call COLOR,make,yellow)$"        - builds/updates everything, is ready to run with $(TARGET_OUTPUT) after completion$"
 	@$(PRINTLN) $(call COLOR,make,yellow)$" clean  - removes object, file, folder and executable$"
