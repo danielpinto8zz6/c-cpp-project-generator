@@ -81,13 +81,12 @@ s 			:=	$\ $\#
 # literal comma
 ; 			:=	,
 #literal double quotess
-"			:=	"
-"			:=	$(if $(findstring MinGW,$(TERMINAL)),,$")
+"			:=	$(if $(findstring MinGW,$(TERMINAL)),,")
 
 # directories separator
 DIRSEP		=	$(if $1,$1/,)
 # determines if a name is a directory or a file
-IS_DIR		=	$(if $(realpath $1/),$(patsubst %/,%,$(wildcard $1)),)
+IS_DIR		=	$(if $(subst /,,$(patsubst %/,/,$(wildcard $1/))),,$(patsubst %/,%,$(wildcard $1)))
 # determines if a name exists as a file or a directory
 EXISTS		=	$(patsubst %/,%,$(wildcard $1))
 
@@ -95,6 +94,7 @@ EXISTS		=	$(patsubst %/,%,$(wildcard $1))
 SRC_DIR		:=	$(call IS_DIR,$(SOURCE_DIR))
 INCL_DIRS	:=	$(call IS_DIR,$(INCLUDE_DIR))
 LIB_DIRS	:=	$(call IS_DIR,$(LIBRARY_DIR))
+
 
 # OS compatibility
 ifeq ($(OS),Windows_NT)
@@ -319,9 +319,9 @@ RECIPE_DEBUG = $(if $(AT),,echo $1) $1
 
 
 # display complete info
-AT			=	$(if $(filter true,$(DISP_INFO)),,@)
--S			=	$(if $(filter true,$(DISP_INFO)),,-s)
--W			=	$(if $(filter true,$(DISP_INFO)),--print-directory,--no-print-directory)
+AT		=	$(if $(filter true,$(DISP_INFO)),,@)
+-S		=	$(if $(filter true,$(DISP_INFO)),,-s)
+-W		=	$(if $(filter true,$(DISP_INFO)),--print-directory,--no-print-directory)
 
 # outcome messages
 MESSAGE_0.0	:=	$(PRINTLN) $(call COLOR,Executing 'all' complete!,green)
@@ -488,11 +488,11 @@ help:
 		$"(e.g:$" $(call COLOR,make,yellow)$" run?'My Arguments' OR $"$(call COLOR,make,yellow)$" run?MyArguments)$"
 	@$(PRINTLN) $(call COLOR,make,yellow)$" debug  - builds/updates everything displaying more detailed messages$"
 	@$(NL)$(BR) $(MESSAGE_1.7)
-	@$(PRINTLN) $"Operative System:	$"$(call COLOR,$(if $(OS)$(PROCESSOR_ARCHITECTURE),$(OS) ($(PROCESSOR_ARCHITECTURE)),Unknown),$(if $(OS)$(PROCESSOR_ARCHITECTURE),green,red))
-	@$(PRINTLN) $"Terminal:		$"$(call COLOR,$(if $(TERMINAL),$(TERMINAL),Unknown),$(if $(TERMINAL),green,red))
-	@$(PRINTLN) $"Main src file name:	$"$(call COLOR,$(if $(TARGET_N),$(TARGET_N),Unknown),$(if $(TARGET_N),green,red))
-	@$(PRINTLN) $"Detected Language:	$"$(call COLOR,$(if $(SRCEXT),$(SRCEXT),Unknown),$(if $(SRCEXT),green,red))
-	@$(NL)$(BR)
+	@$(PRINTLN) $"Operative System:	$"$(call COLOR,$(if $(OS)$(PROCESSOR_ARCHITECTURE),$(OS) ($(PROCESSOR_ARCHITECTURE)),$"Unknown$"),$(if $(OS)$(PROCESSOR_ARCHITECTURE),green,red))
+	@$(PRINTLN) $"Terminal:		$"$(call COLOR,$(if $(TERMINAL),$(TERMINAL),$"Unknown$"),$(if $(TERMINAL),green,red))
+	@$(PRINTLN) $"Main src file name:	$"$(call COLOR,$(if $(TARGET_N),$(TARGET_N),$"Unknown$"),$(if $(TARGET_N),green,red))
+	@$(PRINTLN) $"Detected Language:	$"$(call COLOR,$(if $(SRCEXT),$(SRCEXT),$"Unknown$"),$(if $(SRCEXT),green,red))
+	@$(NL)$(BR) $(NL)$(BR)
 
 # Non-File Targets
 .PHONY: all clean remake run run? run?% debug help
