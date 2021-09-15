@@ -14,14 +14,14 @@
 	(if set to auto it will try to fetch it itslef. Alternatively enter it manually: cpp, c, ...)
 SRC_EXT				:=	auto
 # define the compiler to use (e.g: gcc, c++, ...)
-CCX				:=	auto
+CCX					:=	auto
 # define the compiler support version (e.g: 98, 99, 03, 11, 14, 17, 2a, ...)
-COMPILER_SUPPORT		:=	auto
+COMPILER_SUPPORT	:=	auto
 # to compile and optimize code (if set to false, the exceptions handler will not start, set to 'true' to get optimizer -Ofast,\
 	'auto' to handle it automatically or any optimizer else like: -O0, -O1, -O2, -O3, ...)
 OPTIMIZER			:=	auto
 # get general warnings (set to false to remove general warnings)
-GENERAL_WARNINGS		:=	true
+GENERAL_WARNINGS	:=	true
 # get larger amount of warnings (set to false to remove negligible warnings)
 USE_STRICT			:=	false
 
@@ -53,6 +53,8 @@ LIBRARY_DIR			:=	lib
 
 # display complete info (this is automatically set to true when "make debug" is called)
 DISP_INFO			:=	false
+# compiling at a faster speed by using Parallel Execution / multiple cores compiling (e.g: false, auto, min, mid, max)
+SPEEDUP				:=	auto
 
 
 
@@ -72,7 +74,7 @@ OS			:=	$(if $(OS),$(OS),$(if $(findstring Darwin,$(shell echo $$(uname))),Mac_O
 # get cpu architecture info
 PROCESSOR_ARCHITECTURE	:=	$(if $(PROCESSOR_ARCHITECTURE),$(PROCESSOR_ARCHITECTURE),$(shell echo $$(uname -p)))
 # get environment info
-TERMINAL		:=	$(if $(filter-out $$(uname),$(shell echo $$(uname))),$(shell echo $$(uname)),$(if $(findstring Windows,$(OS)),MinGW,))
+TERMINAL	:=	$(if $(filter-out $$(uname),$(shell echo $$(uname))),$(shell echo $$(uname)),$(if $(findstring Windows,$(OS)),MinGW,))
 
 # literal whitespace
 s 			:=	$\ $\#
@@ -95,59 +97,64 @@ SRC_DIR		:=	$(call IS_DIR,$(SOURCE_DIR))
 INCL_DIRS	:=	$(call IS_DIR,$(INCLUDE_DIR))
 LIB_DIRS	:=	$(call IS_DIR,$(LIBRARY_DIR))
 
-
 # OS compatibility
 ifeq ($(OS),Windows_NT)
 	OS_EXE		:=	.exe
 	ifeq ($(findstring cygwin, $(shell echo $$OSTYPE)),cygwin)
-		RM 		:=	rm -f
+		RM 			:=	rm -f
 		RMDIR		:=	$(RM)r
-		MD		:=	mkdir -p
+		MD			:=	mkdir -p
 		E_START		:=	"\e
 		E_END		:=	\e[0m"
 		ESC_SEQ		:=	-e
-		BR		:=	;
-		NL		:=	echo
+		BR			:=	;
+		NL			:=	echo
 		EXITSTATUS	:=	$$?
+		NPROCS		:=	$(shell grep -c 'processor' /proc/cpuinfo)
 		MAIN_MATCH	:=	"^(\s)*(unsigned\s+)?(void|bool|short|int|long|long\s+long|double|char)\s+main\s*\((\s|\S)*\)\s*\{?"
-		SRCEXT_FIND	=	egrep -E --include=\*.$(if $(SRCEXT),$(SRCEXT),*) -rnwl $(SRC_DIR) -e $(MAIN_MATCH)
+		SRCEXT_FIND	=	egrep -E --include=\*.$(if $(SRCEXT),$(SRCEXT),*) -rnwl $(if $(strip $(SRC_DIR)),$(SRC_DIR),.) -e $(MAIN_MATCH) 2> /dev/null
 		EXIT1		=	$(if $(filter true,$(DISP_INFO)),exit 1,exit 1 &> /dev/null)
 		FIXPATH		=	$1
+		MATH		=	$(shell echo $$(( $1 )))
 	else
-		RM		:=	DEL /F/Q
+		RM			:=	DEL /F/Q
 		RMDIR		:=	RMDIR /Q/S
-		MD		:=	MKDIR
+		MD			:=	MKDIR
 		E_START		:=	
 		E_END		:=	[0m
-		BR		:=	&
-		NL		:=	type nul | more /e /p
+		BR			:=	&
+		NL			:=	type nul | more /e /p
 		EXITSTATUS	:=	%errorlevel%
+		NPROCS		:=	$(lastword $(strip $(shell WMIC CPU Get NumberOfLogicalProcessors)))
 		MAIN_MATCH	:=	"^[ ]*[unsigned ]*[ ]*[void bool char short int long long long double][ ][ ]*main[ ]*(.*)[ ]*{*"
 		SRCEXT_FIND	=	findstr /s /i /m /r /c:$(MAIN_MATCH) $(call DIRSEP,$(SRC_DIR))*.$(if $(SRCEXT),$(SRCEXT),*) 2>nul
 		EXIT1		=	$(if $(filter true,$(DISP_INFO)),exit 1,exit 1 >nul 2>&1)
 		FIXPATH		=	$(subst /,$\,$1)
+		MATH		=	$(shell echo on | set /a $1)
 	endif
 else
-	RM 		:=	rm -f
+	RM 			:=	rm -f
 	RMDIR		:=	$(RM)r
-	MD		:=	mkdir -p
+	MD			:=	mkdir -p
 	E_START		:=	"\033
 	E_END		:=	\033[0m"
-	BR		:=	;
-	NL		:=	echo
+	BR			:=	;
+	NL			:=	echo
 	EXITSTATUS	:=	$$?
+	NPROCS		:=	$(if $(findstring Mac_OS,$(OS)),$(shell sysctl hw.ncpu  | grep -o '[0-9]\+'),$(shell grep -c 'processor' /proc/cpuinfo))
 	MAIN_MATCH	:=	"^(\s)*(unsigned\s+)?(void|bool|short|int|long|long\s+long|double|char)\s+main\s*\((\s|\S)*\)\s*\{?"
-	SRCEXT_FIND	=	egrep -E --include=\*.$(if $(SRCEXT),$(SRCEXT),*) -rnwl $(SRC_DIR) -e $(MAIN_MATCH)
+	SRCEXT_FIND	=	egrep -E --include=\*.$(if $(SRCEXT),$(SRCEXT),*) -rnwl $(if $(strip $(SRC_DIR)),$(SRC_DIR),.) -e $(MAIN_MATCH) 2> /dev/null
 	EXIT1		=	$(if $(filter true,$(DISP_INFO)),exit 1,exit 1 &> /dev/null)
 	FIXPATH		=	$1
+	MATH		=	$(shell echo $$(( $1 )))
 endif
 
 
 # project language detector ('$s' stands for literal space)
-SRCEXT0		:=	$(if $(subst auto,,$(SRC_EXT)),$(subst $s,,$(SRC_EXT)),$(firstword $(patsubst .%,%,$(filter .%,$(suffix\
+SRCEXT0		:=	$(if $(subst auto,,$(SRC_EXT)),$(subst $s,,$(SRC_EXT)),$(firstword $(patsubst .%,%,$(filter .%,$(suffix \
 					$(filter %.cpp %.c,$(shell $(SRCEXT_FIND))))))))
 # final attempt to get the extension
-SRCEXT		:=	$(if $(SRCEXT0),$(SRCEXT0),$(firstword $(patsubst .%,%,$(filter .%,$(suffix\
+SRCEXT		:=	$(if $(SRCEXT0),$(SRCEXT0),$(firstword $(patsubst .%,%,$(filter .%,$(suffix \
 					$(filter %.cpp %.c,$(wildcard $(call DIRSEP,$(SRC_DIR))*.*)))))))
 
 # automatically generate target name by using the main file name
@@ -177,6 +184,31 @@ TARGET_OUTPUT	:=	$(call FIXPATH,$(call DIRSEP,$(TARGET_DIR))$(TARGET))
 # The following part of the makefile is generic; it can be used to 
 # build any executable just by changing the definitions above and by
 # deleting dependencies appended to the file from 'make depend'
+
+
+
+
+
+#############################
+########## UTILITY ##########
+#############################
+
+
+# equals operator
+EQUALS	=	$(if $(subst $(words $1),,$(words $2)),,$(if $(subst $1,,$2),,$(if $(subst $2,,$1),,$(if $1,$1,true))))
+
+# chose text style
+COLOR 	=	$(if $(filter red,$2),$(E_START)[1;31m$(subst ",,$1)$(E_END),$(if \
+				$(filter green,$2),$(E_START)[1;32m$(subst ",,$1)$(E_END),$(if \
+					$(filter yellow,$2),$(E_START)[1;33m$(subst ",,$1)$(E_END),$(if \
+						$(filter blue,$2),$(E_START)[1;34m$(subst ",,$1)$(E_END),$(if \
+							$(filter magenta,$2),$(E_START)[1;35m$(subst ",,$1)$(E_END),$(if \
+								$(filter cyan,$2),$(E_START)[1;36m$(subst ",,$1)$(E_END),$1))))))
+# enable echo output styling
+PRINTLN	:=	echo$(if $(ESC_SEQ), $(ESC_SEQ),)
+
+# recipe debug
+RECIPE_DEBUG	=	$(if $(AT),,echo $1) $1
 
 
 
@@ -216,6 +248,13 @@ ifeq ($(subst auto,,$(COMPILER_SUPPORT)),)
 		
 	endif
 endif
+
+# makefile multi cores flag
+JOBS	:=	$(if $(call EQUALS,auto,$(strip $(SPEEDUP))),--jobs,$(if \
+				$(call EQUALS,min,$(strip $(SPEEDUP))),--jobs 1,$(if \
+					$(call EQUALS,mid,$(strip $(SPEEDUP))),--jobs $(call MATH,$(NPROCS)/2),$(if \
+						$(call EQUALS,max,$(strip $(SPEEDUP))),--jobs $(NPROCS),$(if \
+							$(findstring -j,$(SPEEDUP))$(findstring --jobs,$(SPEEDUP)),$(SPEEDUP),)))))
 
 
 
@@ -289,39 +328,14 @@ CXXFLAGS	:= $(if $(STD),-std=$(STD)$(COMPILER_SUPPORT),) $(OPT) -Wall $(CCXFLAGS
 
 
 #############################
-########## UTILITY ##########
-#############################
-
-
-# equals operator
-EQUALS = $(if $(subst $(words $1),,$(words $2)),,$(if $(subst $1,,$2),,$(if $(subst $2,,$1),,$(if $1,$1,true))))
-
-# chose text style
-COLOR = $(if $(filter red,$2),$(E_START)[1;31m$(subst ",,$1)$(E_END),$(if \
-			$(filter green,$2),$(E_START)[1;32m$(subst ",,$1)$(E_END),$(if \
-				$(filter yellow,$2),$(E_START)[1;33m$(subst ",,$1)$(E_END),$(if \
-					$(filter blue,$2),$(E_START)[1;34m$(subst ",,$1)$(E_END),$(if \
-						$(filter magenta,$2),$(E_START)[1;35m$(subst ",,$1)$(E_END),$(if \
-							$(filter cyan,$2),$(E_START)[1;36m$(subst ",,$1)$(E_END),$1))))))
-# enable echo output styling
-PRINTLN := echo$(if $(ESC_SEQ), $(ESC_SEQ),)
-
-# recipe debug
-RECIPE_DEBUG = $(if $(AT),,echo $1) $1
-
-
-
-
-
-#############################
 ######### MESSAGES ##########
 #############################
 
 
 # display complete info
-AT		=	$(if $(filter true,$(DISP_INFO)),,@)
--S		=	$(if $(filter true,$(DISP_INFO)),,-s)
--W		=	$(if $(filter true,$(DISP_INFO)),--print-directory,--no-print-directory)
+AT			=	$(if $(filter true,$(DISP_INFO)),,@)
+-S			=	$(if $(filter true,$(DISP_INFO)),,-s)
+-W			=	$(if $(filter true,$(DISP_INFO)),--print-directory,--no-print-directory)
 
 # outcome messages
 MESSAGE_0.0	:=	$(PRINTLN) $(call COLOR,Executing 'all' complete!,green)
@@ -371,7 +385,7 @@ all:
 			$(if $(SRCEXT),\
 				$(if $(if $(shell $(MAKE) $(-S) -q $(TARGET_OUTPUT) || echo 1),,true),\
 					$(MESSAGE_0.3) $(BR) \
-				,$(MESSAGE_1.3) && $(MAKE) $(-W) $(TARGET_OUTPUT) && \
+				,$(MESSAGE_1.3) && $(MAKE) $(JOBS) $(-W) $(TARGET_OUTPUT) && \
 					( $(NL)$(BR) $(MESSAGE_0.0) )\
 				|| $(MAKE) $(-S) exp_handler || \
 					( $(if $(call EQUALS,true,$(OPTIMIZER)),, $(NL)$(BR) $(MESSAGE_0.2) $(BR)) $(EXIT1) ))\
