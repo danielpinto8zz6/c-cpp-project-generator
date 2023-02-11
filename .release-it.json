@@ -2,7 +2,7 @@
     "git": {
         "commitMessage": "chore: 🤖 release v${version}",
         "tagName": "v${version}",
-        "changelog": "npx auto-changelog --stdout -l false -u -p"
+        "changelog": "npx auto-changelog --stdout -l false -u -p -t changelog-template.hbs"
     },
     "github": {
         "release": true,
@@ -10,14 +10,13 @@
         "assets": [
             "c-cpp-project-generator-*.vsix"
         ],
-        "requireBranch": "master"
+        "releaseNotes": "npx auto-changelog --stdout -l false -u -p -t release-notes-template.hbs --unreleased-only"
     },
     "npm": {
         "publish": false
     },
     "hooks": {
         "after:bump": "npx auto-changelog -p",
-        "before:github:release": "npx vsce package",
-        "after:github:release": "npx vsce publish"
+        "before:github:release": "npx @vscode/vsce package"
     }
 }
