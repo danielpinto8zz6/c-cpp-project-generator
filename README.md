@@ -2,9 +2,12 @@
 
 # C/C++ Project Generator
 
-[![Marketplace Version](https://vsmarketplacebadge.apphb.com/version-short/danielpinto8zz6.c-cpp-project-generator.svg)](https://marketplace.visualstudio.com/items?itemName=danielpinto8zz6.c-cpp-project-generator)
-[![Downloads](https://vsmarketplacebadge.apphb.com/downloads-short/danielpinto8zz6.c-cpp-project-generator.svg)](https://marketplace.visualstudio.com/items?itemName=danielpinto8zz6.c-cpp-project-generator)
-[![Rating](https://vsmarketplacebadge.apphb.com/rating-short/danielpinto8zz6.c-cpp-project-generator.svg)](https://marketplace.visualstudio.com/items?itemName=danielpinto8zz6.c-cpp-project-generator)
+<a href="https://www.buymeacoffee.com/danielpinto8zz6" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
+[![Support via PayPal](resources/paypal-donate-button.png)](https://www.paypal.me/danielpinto8zz6/)
+
+[![Marketplace Version](https://vsmarketplacebadges.dev/version-short/danielpinto8zz6.c-cpp-project-generator.png)](https://marketplace.visualstudio.com/items?itemName=danielpinto8zz6.c-cpp-project-generator)
+[![Downloads](https://vsmarketplacebadges.dev/downloads-short/danielpinto8zz6.c-cpp-project-generator.png)](https://marketplace.visualstudio.com/items?itemName=danielpinto8zz6.c-cpp-project-generator)
+[![Rating](https://vsmarketplacebadges.dev/rating-short/danielpinto8zz6.c-cpp-project-generator.png)](https://marketplace.visualstudio.com/items?itemName=danielpinto8zz6.c-cpp-project-generator)
 
 Create C/C++ projects
 
