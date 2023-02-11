@@ -15,3 +15,6 @@ export async function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(createCProjectCommand, createCppProjectCommand);
 }
+
+export function deactivate() {
+}
