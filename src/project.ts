@@ -55,11 +55,56 @@ export class Project {
     }
 
     async createProject(type: string) {
-        const result: Uri = await VSCodeUI.openDialogForFolder();
-        if (result && result.fsPath) {
-            await vscode.commands.executeCommand('vscode.openFolder', result);
-            await this.createFolders(result.fsPath);
-            await this.createFiles({ type, location: result.fsPath });
+        // 1. Prompt for project name
+        const projectName = await VSCodeUI.promptForProjectName();
+        if (!projectName) {
+            vscode.window.showInformationMessage('Project creation cancelled: No project name provided.');
+            return; // Exit if no name is given
+        }
+
+        // 2. Prompt for parent directory using the open dialog
+        const parentDirectoryUri = await VSCodeUI.promptForParentDirectory(projectName);
+        if (!parentDirectoryUri) {
+            vscode.window.showInformationMessage('Project creation cancelled: No parent directory selected.');
+            return; // Exit if no directory is selected
+        }
+
+        // 3. Construct the final project path
+        const finalProjectPath = path.join(parentDirectoryUri.fsPath, projectName);
+
+        try {
+            // 4. Ensure the target project directory exists (creates if not present)
+            await fs.ensureDir(finalProjectPath);
+
+            // 5. Check if directory is empty (This check remains relevant)
+            const files = await fs.readdir(finalProjectPath);
+            if (files.length > 0) {
+                const overwrite = await vscode.window.showWarningMessage(
+                    `The directory ${finalProjectPath} is not empty. Do you want to proceed and potentially overwrite files?`,
+                    { modal: true },
+                    'Yes', 'No'
+                );
+                if (overwrite !== 'Yes') {
+                    vscode.window.showInformationMessage('Project creation cancelled.');
+                    return;
+                }
+            }
+
+            // 6. Create standard subfolders (src, include, etc.) inside the final project path
+            await this.createFolders(finalProjectPath);
+
+            // 7. Create project files (Makefile, main.c/cpp, .vscode/*) inside the final project path
+            await this.createFiles({ type, location: finalProjectPath });
+
+            // 8. Open the created project folder in VS Code
+            const projectUri = Uri.file(finalProjectPath);
+            await vscode.commands.executeCommand('vscode.openFolder', projectUri, { forceNewWindow: false });
+
+            vscode.window.showInformationMessage(`Successfully created ${type.toUpperCase()} project '${projectName}' at ${finalProjectPath}`);
+
+        } catch (err) {
+            console.error(err);
+            vscode.window.showErrorMessage(`Failed to create project: ${err}`);
         }
     }
 }
