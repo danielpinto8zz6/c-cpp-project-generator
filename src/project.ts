@@ -21,15 +21,22 @@ export class Project {
             const mainPath = path.join(this.context.extensionPath, 'templates', type, `main.${type}`);
             const makefilePath = path.join(this.context.extensionPath, 'templates', type, 'Makefile');
 
+            // Ensure .vscode and src directories exist before writing files into them
+            await fs.ensureDir(path.join(location, '.vscode'));
             fs.writeFileSync(path.join(location, '.vscode', 'tasks.json'), fs.readFileSync(tasksPath, 'utf-8'));
             fs.writeFileSync(path.join(location, '.vscode', 'launch.json'), fs.readFileSync(launchPath, 'utf-8'));
+
+            await fs.ensureDir(path.join(location, 'src'));
             fs.writeFileSync(path.join(location, 'src', `main.${type}`), fs.readFileSync(mainPath, 'utf-8'));
+
             fs.writeFileSync(path.join(location, 'Makefile'), fs.readFileSync(makefilePath, 'utf-8'));
 
-            vscode.workspace.openTextDocument(path.join(location, 'src', 'main.cpp'))
+            // Open the main file after creation
+            vscode.workspace.openTextDocument(path.join(location, 'src', `main.${type}`))
                 .then(doc => vscode.window.showTextDocument(doc, { preview: false }));
         } catch (err) {
             console.error(err);
+            vscode.window.showErrorMessage(`Error creating project files: ${err}`);
         }
     }
 
