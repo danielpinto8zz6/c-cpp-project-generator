@@ -42,13 +42,16 @@ export class Project {
 
 
     async createFolders(location: string) {
-        this.directories.forEach((dir: string) => {
+        // Use Promise.all for potentially faster parallel directory creation
+        await Promise.all(this.directories.map(async (dir: string) => {
             try {
-                fs.ensureDirSync(path.join(location, dir));
+                await fs.ensureDir(path.join(location, dir));
             } catch (err) {
                 console.error(err);
+                vscode.window.showErrorMessage(`Error creating directory ${dir}: ${err}`);
+                throw err; // Re-throw to stop the process if a folder fails
             }
-        });
+        }));
     }
 
     async createProject(type: string) {
