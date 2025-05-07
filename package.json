@@ -3,19 +3,40 @@
     "displayName": "C/C++ Project Generator",
     "description": "Generate C/C++ Projects",
     "version": "1.2.16",
-    "icon": "resources/logo.png",
     "publisher": "danielpinto8zz6",
+    "author": {
+        "name": "Daniel Pinto",
+        "email": "danielpinto@duck.com",
+        "url": "https://danielpinto8zz6.github.io"
+    },
+    "icon": "resources/logo.png",
     "engines": {
         "vscode": "^1.99.3"
     },
+    "main": "./dist/extension.js",
     "categories": [
         "Other"
     ],
+    "keywords": [
+        "c",
+        "cpp",
+        "project",
+        "generator"
+    ],
+    "bugs": {
+        "url": "https://github.com/danielpinto8zz6/c-cpp-project-generator/issues",
+        "email": "danielpinto8zz6@gmail.com"
+    },
+    "license": "GPL-3.0",
+    "homepage": "https://github.com/danielpinto8zz6/c-cpp-project-generator#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/danielpinto8zz6/c-cpp-project-generator.git"
+    },
     "activationEvents": [
         "onCommand:extension.createCProject",
         "onCommand:extension.createCppProject"
     ],
-    "main": "./out/extension",
     "contributes": {
         "commands": [
             {
@@ -28,16 +49,6 @@
             }
         ]
     },
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/danielpinto8zz6/c-cpp-project-generator.git"
-    },
-    "author": "danielpinto8zz6",
-    "license": "ISC",
-    "bugs": {
-        "url": "https://github.com/danielpinto8zz6/c-cpp-project-generator/issues"
-    },
-    "homepage": "https://github.com/danielpinto8zz6/c-cpp-project-generator#readme",
     "scripts": {
         "vscode:prepublish": "npm run package",
         "compile": "webpack",
