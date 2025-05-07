@@ -1,14 +1,14 @@
-import * as vscode from 'vscode';
 import { Project } from './project';
+import { commands, ExtensionContext } from 'vscode';
 
-export async function activate(context: vscode.ExtensionContext) {
+export function activate(context: ExtensionContext) {
     const project = new Project(context);
-    const createCProjectCommand = vscode.commands.registerCommand('extension.createCProject', () => {
+    const createCProjectCommand = commands.registerCommand('extension.createCProject', () => {
         project.createProject('c')
             .catch(error => console.log(error));
     });
 
-    const createCppProjectCommand = vscode.commands.registerCommand('extension.createCppProject', () => {
+    const createCppProjectCommand = commands.registerCommand('extension.createCppProject', () => {
         project.createProject('cpp')
             .catch(error => console.log(error));
     });
