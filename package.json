@@ -2,7 +2,7 @@
     "name": "c-cpp-project-generator",
     "displayName": "C/C++ Project Generator",
     "description": "Generate C/C++ Projects",
-    "version": "1.2.13",
+    "version": "1.2.14",
     "icon": "resources/logo.png",
     "publisher": "danielpinto8zz6",
     "engines": {
